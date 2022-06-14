@@ -9,6 +9,8 @@ def main():
         'app:app',
         port=app_settings.port,
         host=app_settings.host,
+        debug=app_settings.is_debug,
+        reload=app_settings.is_debug,
     )
 
 

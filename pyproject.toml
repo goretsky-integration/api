@@ -8,6 +8,8 @@ authors = ["usbtypec1 <eldos.baktybekov@gmail.com>"]
 python = "^3.10"
 fastapi = "^0.78.0"
 uvicorn = "^0.17.6"
+httpx = "^0.23.0"
+python-dotenv = "^0.20.0"
 
 [tool.poetry.dev-dependencies]
 
