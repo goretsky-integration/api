@@ -59,3 +59,27 @@ def calculate_revenue_delta_in_percents(revenue_today: int | float,
         return revenue_today_percents - 100
     except ValueError:
         return 0
+
+
+def calculate_orders_percentage_with_phone_numbers(
+        orders_with_phone_numbers_amount: int,
+        total_orders_amount: int,
+) -> int:
+    """
+    Examples:
+        >>> calculate_orders_percentage_with_phone_numbers(10, 40)
+        25
+        >>> calculate_orders_percentage_with_phone_numbers(0, 0)
+        0
+
+    Returns:
+        Orders with phone numbers percentage.
+    """
+    try:
+        return round(calculate_proportion(
+            x1=total_orders_amount,
+            y1=100,
+            x2=orders_with_phone_numbers_amount,
+        ))
+    except ValueError:
+        return 0
