@@ -1,5 +1,5 @@
 import models
-from services.calculations import calculate_revenue_delta_in_percents
+from utils.calculations import calculate_revenue_delta_in_percents
 
 
 def weekly_operational_statistics_to_revenue_statistics(
