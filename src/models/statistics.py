@@ -1,8 +1,12 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 
 __all__ = (
     'RevenueForTodayAndWeekBeforeStatistics',
     'RestaurantOrdersStatistics',
+    'KitchenRevenue',
+    'KitchenStatistics',
+    'Tracking',
+    'ProductSpending',
 )
 
 
@@ -18,3 +22,27 @@ class RestaurantOrdersStatistics(BaseModel):
     orders_with_phone_numbers_amount: int
     orders_with_phone_numbers_percentage: int
     total_orders_amount: int
+
+
+class ProductSpending(BaseModel):
+    per_hour: float
+    delta_from_week_before: int
+
+
+class KitchenRevenue(BaseModel):
+    per_hour: int
+    delta_from_week_before: int
+
+
+class Tracking(BaseModel):
+    postponed: int
+    in_queue: int
+    in_work: int
+
+
+class KitchenStatistics(BaseModel):
+    unit_id: int
+    revenue: KitchenRevenue
+    product_spending: ProductSpending
+    average_cooking_time: int
+    tracking: Tracking
