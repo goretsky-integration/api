@@ -1,4 +1,6 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, NonNegativeFloat
+
+from models.private_dodo_api import UnitDeliveryStatistics
 
 __all__ = (
     'RevenueForTodayAndWeekBeforeStatistics',
@@ -7,6 +9,7 @@ __all__ = (
     'KitchenStatistics',
     'Tracking',
     'ProductSpending',
+    'UnitDeliveryStatisticsExtended',
 )
 
 
@@ -46,3 +49,9 @@ class KitchenStatistics(BaseModel):
     product_spending: ProductSpending
     average_cooking_time: int
     tracking: Tracking
+
+
+class UnitDeliveryStatisticsExtended(UnitDeliveryStatistics):
+    orders_for_courier_count_per_hour: NonNegativeFloat
+    delivery_with_courier_app_percent: NonNegativeFloat
+    couriers_workload: NonNegativeFloat
