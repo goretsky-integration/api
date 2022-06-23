@@ -19,9 +19,9 @@ class RevenueForTodayAndWeekBeforeStatistics(BaseModel):
 
 class RestaurantOrdersStatistics(BaseModel):
     department: str
-    orders_with_phone_numbers_amount: int
+    orders_with_phone_numbers_count: int
     orders_with_phone_numbers_percentage: int
-    total_orders_amount: int
+    total_orders_count: int
 
 
 class ProductSpending(BaseModel):
