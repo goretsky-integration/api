@@ -1,42 +1,12 @@
 __all__ = (
     'calculate_revenue_delta_in_percents',
-    'calculate_proportion',
+    'calculate_delivery_with_courier_app_percent',
+    'calculate_orders_for_courier_count_per_hour',
+    'calculate_orders_percentage_with_phone_numbers',
+    'calculate_couriers_workload',
 )
 
-
-def calculate_proportion(
-        *,
-        x1: int | float,
-        y1: int | float,
-        x2: int | float,
-) -> float:
-    """Calculate proportion (unknown y2).
-    x1   x2
-    -- = --
-    y1   y2
-    Then y2 = (x2 * y1) / x1.
-
-    Args:
-        x1: Numerator of known ratio.
-        y1: Denominator of known ratio.
-        x2: Numerator of unknown ratio.
-
-    Returns:
-        Value of y2, i.e. denominator of unknown ratio.
-
-    Examples:
-        >>> print(calculate_proportion(x1=2, y1=4, x2=3))
-        6
-        >>> print(calculate_proportion(x1=15, y1=45, x2=60))
-        180
-
-    Raises:
-        ValueError: if any of arguments equal to zero.
-    """
-    for num in (x1, y1, x2):
-        if num == 0:
-            raise ValueError('All parts of proportion must not be zero')
-    return x2 * y1 / x1
+SECONDS_IN_HOUR = 3600
 
 
 def calculate_revenue_delta_in_percents(revenue_today: int | float,
@@ -50,15 +20,9 @@ def calculate_revenue_delta_in_percents(revenue_today: int | float,
 
     Returns: Difference of revenue between today and week before in percents.
     """
-    try:
-        revenue_today_percents = round(calculate_proportion(
-            x1=revenue_week_before,
-            y1=100,
-            x2=revenue_today,
-        ))
-        return revenue_today_percents - 100
-    except ValueError:
+    if revenue_week_before == 0:
         return 0
+    return round(revenue_today / revenue_week_before * 100) - 100
 
 
 def calculate_orders_percentage_with_phone_numbers(
@@ -75,11 +39,30 @@ def calculate_orders_percentage_with_phone_numbers(
     Returns:
         Orders with phone numbers percentage.
     """
-    try:
-        return round(calculate_proportion(
-            x1=total_orders_count,
-            y1=100,
-            x2=orders_with_phone_numbers_count,
-        ))
-    except ValueError:
+    if total_orders_count == 0:
         return 0
+    return round(orders_with_phone_numbers_count / total_orders_count * 100)
+
+
+def calculate_orders_for_courier_count_per_hour(
+        delivery_orders_count: int,
+        couriers_shift_duration: int,
+) -> float:
+    if couriers_shift_duration == 0:
+        return 0
+    return round(delivery_orders_count / (couriers_shift_duration / SECONDS_IN_HOUR), 1)
+
+
+def calculate_delivery_with_courier_app_percent(
+        orders_with_courier_app_count: int,
+        delivery_orders_count: int,
+) -> float:
+    if delivery_orders_count == 0:
+        return 0
+    return round(orders_with_courier_app_count / delivery_orders_count * 100, 2)
+
+
+def calculate_couriers_workload(trips_duration: int, couriers_shifts_duration: int) -> float:
+    if couriers_shifts_duration == 0:
+        return 0
+    return round(trips_duration / couriers_shifts_duration * 100, 2)
