@@ -1,9 +1,12 @@
+import models
+
 __all__ = (
     'calculate_revenue_delta_in_percents',
     'calculate_delivery_with_courier_app_percent',
     'calculate_orders_for_courier_count_per_hour',
     'calculate_orders_percentage_with_phone_numbers',
     'calculate_couriers_workload',
+    'calculate_revenue_metadata',
 )
 
 SECONDS_IN_HOUR = 3600
@@ -66,3 +69,19 @@ def calculate_couriers_workload(trips_duration: int, couriers_shifts_duration: i
     if couriers_shifts_duration == 0:
         return 0
     return round(trips_duration / couriers_shifts_duration * 100, 2)
+
+
+def calculate_revenue_metadata(
+        revenue_statistics: list[models.RevenueForTodayAndWeekBeforeStatistics],
+) -> models.UnitsRevenueMetadata:
+    total_revenue_today = 0
+    total_revenue_week_before = 0
+    for unit_revenue_statistics in revenue_statistics:
+        total_revenue_today += unit_revenue_statistics.today
+        total_revenue_week_before += unit_revenue_statistics.week_before
+    delta_from_week_before = calculate_revenue_delta_in_percents(total_revenue_today, total_revenue_week_before)
+    return models.UnitsRevenueMetadata(
+        delta_from_week_before=delta_from_week_before,
+        total_revenue_week_before=total_revenue_week_before,
+        total_revenue_today=total_revenue_today,
+    )

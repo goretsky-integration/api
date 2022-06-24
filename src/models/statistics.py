@@ -1,4 +1,4 @@
-from pydantic import BaseModel, NonNegativeFloat
+from pydantic import BaseModel, NonNegativeFloat, NonNegativeInt
 
 from models.private_dodo_api import UnitDeliveryStatistics
 
@@ -10,14 +10,29 @@ __all__ = (
     'Tracking',
     'ProductSpending',
     'UnitDeliveryStatisticsExtended',
+    'UnitsRevenueStatistics',
+    'UnitsRevenueMetadata',
+    'UnitDeliveryStatistics',
 )
+
+
+class UnitsRevenueMetadata(BaseModel):
+    total_revenue_today: NonNegativeInt
+    total_revenue_week_before: NonNegativeInt
+    delta_from_week_before: float
 
 
 class RevenueForTodayAndWeekBeforeStatistics(BaseModel):
     unit_id: int
     today: int
     week_before: int
-    delta_from_week_before: int
+    delta_from_week_before: float
+
+
+class UnitsRevenueStatistics(BaseModel):
+    revenues: list[RevenueForTodayAndWeekBeforeStatistics]
+    metadata: UnitsRevenueMetadata
+    error_unit_ids: list[int]
 
 
 class RestaurantOrdersStatistics(BaseModel):
