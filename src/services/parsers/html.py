@@ -2,18 +2,21 @@ import unicodedata
 from abc import ABC, abstractmethod
 from typing import Any
 
+import pandas as pd
 from bs4 import BeautifulSoup
 
 import models
 
 __all__ = (
     'KitchenStatisticsParser',
+    'BeingLateCertificatesParser',
 )
 
 
 class HTMLParser(ABC):
 
     def __init__(self, html: str):
+        self._html = html
         self._soup = BeautifulSoup(html, 'lxml')
 
     @abstractmethod
@@ -69,3 +72,19 @@ class KitchenStatisticsParser(HTMLParser):
             average_cooking_time=self.parse_average_cooking_time(),
             tracking=self.parse_tracking()
         )
+
+
+class BeingLateCertificatesParser(HTMLParser):
+
+    def parse(self) -> list[models.UnitBeingLateCertificates] | models.SingleUnitBeingLateCertificates:
+        if 'данные не найдены' in self._soup.text.strip().lower():
+            return []
+        df = pd.read_html(self._html)[1]
+        if len(df.columns) == 7:
+            return models.SingleUnitBeingLateCertificates(being_late_certificates_count=len(df.index))
+        return [
+            models.UnitBeingLateCertificates(
+                unit_name=unit_name,
+                being_late_certificates_count=len(group.index)
+            ) for unit_name, group in df.groupby('Пиццерия')
+        ]

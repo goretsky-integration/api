@@ -14,6 +14,8 @@ __all__ = (
     'UnitsRevenueMetadata',
     'UnitDeliveryStatistics',
     'KitchenStatisticsBatch',
+    'UnitBeingLateCertificates',
+    'SingleUnitBeingLateCertificates',
 )
 
 
@@ -76,3 +78,12 @@ class UnitDeliveryStatisticsExtended(UnitDeliveryStatistics):
     orders_for_courier_count_per_hour: NonNegativeFloat
     delivery_with_courier_app_percent: NonNegativeFloat
     couriers_workload: NonNegativeFloat
+
+
+class UnitBeingLateCertificates(BaseModel):
+    unit_name: str
+    being_late_certificates_count: int
+
+
+class SingleUnitBeingLateCertificates(BaseModel):
+    being_late_certificates_count: int

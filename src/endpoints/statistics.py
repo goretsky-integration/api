@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime
+from datetime import datetime, date
 
 from fastapi import APIRouter, Query, Body
 from pydantic import PositiveInt
@@ -74,7 +74,7 @@ async def get_delivery_statistics(
 
 @router.get(
     path='/production',
-    response_model=list,
+    response_model=list[models.OrdersHandoverTime],
     response_model_by_alias=False,
 )
 async def get_production_statistics(
@@ -84,3 +84,16 @@ async def get_production_statistics(
         to_datetime: datetime | None = Query(None, description='If datetime is not specified, today will be set'),
 ):
     return await private_dodo_api.get_production_statistics(token, unit_uuids, from_datetime, to_datetime)
+
+
+@router.post(
+    path='/being-late-certificates',
+    response_model=list[models.UnitBeingLateCertificates] | models.SingleUnitBeingLateCertificates,
+)
+async def get_being_late_certificates_statistics(
+        cookies: dict = Body(...),
+        unit_ids: set[int] = Body(...),
+        from_date: date | None = Body(None, description='If date is not specified, today will be set'),
+        to_date: date | None = Body(None, description='If date is not specified, today will be set'),
+):
+    return await dodo_is_api.get_being_late_certificates(cookies, from_date, to_date, unit_ids)

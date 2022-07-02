@@ -1,4 +1,5 @@
 import asyncio
+from datetime import date
 from typing import Iterable, TypeAlias
 
 import httpx
@@ -6,6 +7,7 @@ import pandas as pd
 from fastapi import HTTPException, status
 
 import models
+from core import config
 from utils import exceptions
 from services import parsers
 
@@ -23,8 +25,9 @@ async def get_restaurant_orders(
 ) -> pd.DataFrame:
     """Get DataFrame with orders."""
     url = 'https://officemanager.dodopizza.ru/Reports/Orders/Get'
+    headers = {'User-Agent': config.APP_USER_AGENT}
     async with httpx.AsyncClient(cookies=cookies) as client:
-        response = await client.post(url, timeout=30, data={
+        response = await client.post(url, timeout=30, headers=headers, data={
             'filterType': 'OrdersFromRestaurant',
             'unitsIds': unit_ids,
             'OrderSources': 'Restaurant',
@@ -43,8 +46,9 @@ async def get_kitchen_statistics(
 ) -> models.KitchenStatistics:
     url = 'https://officemanager.dodopizza.ru/OfficeManager/OperationalStatistics/KitchenPartial'
     params = {'unitId': unit_id}
+    headers = {'User-Agent': config.APP_USER_AGENT}
     async with httpx.AsyncClient(cookies=cookies) as client:
-        response = await client.get(url, params=params, timeout=30)
+        response = await client.get(url, params=params, timeout=30, headers=headers)
         if not response.is_success:
             raise exceptions.KitchenStatisticsError(unit_id=unit_id)
         return parsers.KitchenStatisticsParser(response.text, unit_id).parse()
@@ -66,3 +70,22 @@ async def get_kitchen_statistics_batch(
             if isinstance(response, exceptions.KitchenStatisticsError)
         ]
     )
+
+
+async def get_being_late_certificates(
+        cookies: dict,
+        from_date: date,
+        to_date: date,
+        unit_ids: Iterable[int],
+) -> list[models.UnitBeingLateCertificates] | models.SingleUnitBeingLateCertificates:
+    url = 'https://officemanager.dodopizza.ru/Reports/BeingLateCertificates/Get'
+    data = {
+        'unitsIds': tuple(unit_ids),
+        'beginDate': from_date.strftime('%d.%m.%Y'),
+        'endDate': to_date.strftime('%d.%m.%Y'),
+    }
+    headers = {'User-Agent': config.APP_USER_AGENT}
+    print(data)
+    async with httpx.AsyncClient(cookies=cookies) as client:
+        response = await client.post(url, data=data, headers=headers, timeout=30)
+    return parsers.BeingLateCertificatesParser(response.text).parse()
