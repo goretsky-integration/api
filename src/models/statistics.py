@@ -13,6 +13,7 @@ __all__ = (
     'UnitsRevenueStatistics',
     'UnitsRevenueMetadata',
     'UnitDeliveryStatistics',
+    'KitchenStatisticsBatch',
 )
 
 
@@ -64,6 +65,11 @@ class KitchenStatistics(BaseModel):
     product_spending: ProductSpending
     average_cooking_time: int
     tracking: Tracking
+
+
+class KitchenStatisticsBatch(BaseModel):
+    kitchen_statistics: list[KitchenStatistics]
+    error_unit_ids: list[int]
 
 
 class UnitDeliveryStatisticsExtended(UnitDeliveryStatistics):
