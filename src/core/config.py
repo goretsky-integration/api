@@ -1,3 +1,5 @@
+import pathlib
+
 from dotenv import load_dotenv
 from pydantic import BaseSettings, Field
 
@@ -8,6 +10,7 @@ __all__ = (
 load_dotenv()
 
 APP_USER_AGENT = 'Goretsky-Band'
+ROOT_PATH = pathlib.Path(__file__).parent.parent.parent
 
 
 class AppSettings(BaseSettings):
