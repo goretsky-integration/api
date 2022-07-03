@@ -35,11 +35,10 @@ class UnitDeliveryStatistics(BaseModel):
     trips_duration: NonNegativeInt = Field(alias='tripsDuration')
 
 
-class StopSalesByIngredients(BaseModel):
+class StopSales(BaseModel):
     unit_id: uuid.UUID = Field(alias='unitId')
     unit_name: str = Field(alias='unitName')
-    ingredient_name: str = Field(alias='ingredientName')
-    reason: str = Field(alias='reason')
+    reason: str = Field()
     started_at: datetime = Field(alias='startedAt')
     ended_at: datetime | None = Field(alias='endedAt')
     staff_name_who_stopped: str = Field(alias='staffNameWhoStopped')
@@ -48,29 +47,19 @@ class StopSalesByIngredients(BaseModel):
     _get_or_none = validator('staff_name_who_resumed', 'ended_at', allow_reuse=True, pre=True)(get_or_none)
 
 
-class StopSalesByProduct(BaseModel):
-    unit_id: uuid.UUID = Field(alias='unitId')
-    unit_name: str = Field(alias='unitName')
+class StopSalesByIngredients(StopSales):
+    ingredient_name: str = Field(alias='ingredientName')
+
+
+class StopSalesByProduct(StopSales):
     product_name: str = Field(alias='productName')
-    reason: str = Field(alias='reason')
-    started_at: datetime = Field(alias='startedAt')
-    ended_at: datetime = Field(alias='endedAt')
-    staff_name_who_stopped: str = Field(alias='staffNameWhoStopped')
-    staff_name_who_resumed: str = Field(alias='staffNameWhoResumed')
 
 
-class StopSalesBySalesChannels(BaseModel):
-    unit_id: uuid.UUID = Field(alias='unitId')
-    unit_name: str = Field(alias='unitName')
+class StopSalesBySalesChannels(StopSales):
     sales_channel_name: str = Field(alias='salesChannelName')
-    reason: str = Field(alias='reason')
-    started_at: datetime = Field(alias='startedAt')
-    ended_at: datetime = Field(alias='endedAt')
-    staff_name_who_stopped: str = Field(alias='staffNameWhoStopped')
-    staff_name_who_resumed: str = Field(alias='staffNameWhoResumed')
 
 
-class OrdersHandoverTime(BaseModel):
+class OrdersHandoverTime(StopSales):
     unit_id: uuid.UUID = Field(alias='unitId')
     unit_name: str = Field(alias='unitName')
     order_id: uuid.UUID = Field(alias='orderId')

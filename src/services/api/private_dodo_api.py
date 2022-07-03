@@ -55,7 +55,7 @@ async def get_products_stop_sales(
     url = 'https://api.dodois.io/dodopizza/ru/production/stop-sales-products'
     products_stop_sales = await request_to_private_dodo_api(url, token, unit_uuids, from_datetime, to_datetime)
     return parse_obj_as(list[models.StopSalesByProduct],
-                        products_stop_sales['stopSalesByProduct'])
+                        products_stop_sales['stopSalesByProducts'])
 
 
 async def get_production_statistics(
