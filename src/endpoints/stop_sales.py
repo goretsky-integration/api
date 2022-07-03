@@ -3,6 +3,7 @@ from datetime import datetime
 
 from fastapi import APIRouter, Query
 
+import models
 from services.api import private_dodo_api
 
 router = APIRouter(prefix='/stop-sales', tags=['Stop sales'])
@@ -11,6 +12,7 @@ router = APIRouter(prefix='/stop-sales', tags=['Stop sales'])
 @router.get(
     path='/ingredients',
     response_model_by_alias=False,
+    response_model=list[models.StopSalesByIngredients],
 )
 async def get_ingredient_stop_sales(
         token: str,
@@ -24,6 +26,7 @@ async def get_ingredient_stop_sales(
 @router.get(
     path='/channels',
     response_model_by_alias=False,
+    response_model=list[models.StopSalesBySalesChannels],
 )
 async def get_channels_stop_sales(
         token: str,
@@ -37,6 +40,7 @@ async def get_channels_stop_sales(
 @router.get(
     path='/products',
     response_model_by_alias=False,
+    response_model=list[models.StopSalesByProduct],
 )
 async def get_products_stop_sales(
         token: str,
