@@ -47,7 +47,7 @@ async def get_restaurant_orders_statistics(cookies: dict = Body(...), unit_ids: 
 
 @router.post(
     path='/kitchen',
-    response_model=models.KitchenStatistics,
+    response_model=models.KitchenStatisticsBatch,
 )
 async def get_kitchen_statistics(cookies: dict = Body(...), unit_ids: set[int] = Body(...)):
     return await dodo_is_api.get_kitchen_statistics_batch(cookies, unit_ids)
