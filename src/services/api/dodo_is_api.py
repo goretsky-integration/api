@@ -8,7 +8,7 @@ from fastapi import HTTPException, status
 
 import models
 from core import config
-from utils import exceptions
+from utils import exceptions, time_utils
 from services import parsers
 
 __all__ = (
@@ -78,6 +78,10 @@ async def get_being_late_certificates(
         to_date: date,
         unit_ids: Iterable[int],
 ) -> list[models.UnitBeingLateCertificates] | models.SingleUnitBeingLateCertificates:
+    if from_date is None:
+        from_date = time_utils.get_moscow_datetime_now().date()
+    if to_date is None:
+        to_date = time_utils.get_moscow_datetime_now().date()
     url = 'https://officemanager.dodopizza.ru/Reports/BeingLateCertificates/Get'
     data = {
         'unitsIds': tuple(unit_ids),
