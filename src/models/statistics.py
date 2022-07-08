@@ -16,6 +16,8 @@ __all__ = (
     'KitchenStatisticsBatch',
     'UnitBeingLateCertificates',
     'SingleUnitBeingLateCertificates',
+    'UnitBeingLateCertificatesTodayAndWeekBefore',
+    'SingleUnitBeingLateCertificatesTodayAndWeekBefore',
 )
 
 
@@ -87,3 +89,14 @@ class UnitBeingLateCertificates(BaseModel):
 
 class SingleUnitBeingLateCertificates(BaseModel):
     being_late_certificates_count: int
+
+
+class UnitBeingLateCertificatesTodayAndWeekBefore(BaseModel):
+    unit_name: str
+    certificates_today_count: NonNegativeInt
+    certificates_week_before_count: NonNegativeInt
+
+
+class SingleUnitBeingLateCertificatesTodayAndWeekBefore(BaseModel):
+    certificates_today_count: NonNegativeInt
+    certificates_week_before_count: NonNegativeInt

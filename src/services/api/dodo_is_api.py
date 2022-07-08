@@ -74,10 +74,14 @@ async def get_kitchen_statistics_batch(
 
 async def get_being_late_certificates(
         cookies: dict,
-        from_date: date,
-        to_date: date,
         unit_ids: Iterable[int],
+        from_date: date | None = None,
+        to_date: date | None = None,
 ) -> list[models.UnitBeingLateCertificates] | models.SingleUnitBeingLateCertificates:
+    if from_date is None:
+        from_date = time_utils.get_moscow_datetime_now().date()
+    if to_date is None:
+        to_date = time_utils.get_moscow_datetime_now().date()
     url = 'https://officemanager.dodopizza.ru/Reports/BeingLateCertificates/Get'
     data = {
         'unitsIds': tuple(unit_ids),
@@ -85,7 +89,6 @@ async def get_being_late_certificates(
         'endDate': to_date.strftime('%d.%m.%Y'),
     }
     headers = {'User-Agent': config.APP_USER_AGENT}
-    print(data)
     async with httpx.AsyncClient(cookies=cookies) as client:
         response = await client.post(url, data=data, headers=headers, timeout=30)
     return parsers.BeingLateCertificatesParser(response.text).parse()

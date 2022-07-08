@@ -5,6 +5,7 @@ from fastapi import APIRouter, Query, Body
 from pydantic import PositiveInt
 
 import models
+from services import statistics
 from services.api import dodo_is_api, private_dodo_api, public_dodo_api
 from services.parsers.orders import parse_restaurant_orders_dataframe
 from utils import time_utils
@@ -96,4 +97,16 @@ async def get_being_late_certificates_statistics(
         from_date: date | None = Body(None, description='If date is not specified, today will be set'),
         to_date: date | None = Body(None, description='If date is not specified, today will be set'),
 ):
-    return await dodo_is_api.get_being_late_certificates(cookies, from_date, to_date, unit_ids)
+    return await dodo_is_api.get_being_late_certificates(cookies, unit_ids, from_date, to_date)
+
+
+@router.post(
+    path='/being-late-certificates/today-and-week-before',
+    response_model=list[models.UnitBeingLateCertificatesTodayAndWeekBefore] \
+                   | models.SingleUnitBeingLateCertificatesTodayAndWeekBefore
+)
+async def get_being_late_certificates_today_and_week_before(
+        cookies: dict = Body(...),
+        unit_ids: set[int] = Body(...),
+):
+    return await statistics.get_being_late_certificates_statistics(cookies, unit_ids)
