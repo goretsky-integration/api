@@ -11,6 +11,7 @@ __all__ = (
 app = FastAPI()
 app.include_router(endpoints.statistics.router, prefix='/v1')
 app.include_router(endpoints.stop_sales.router, prefix='/v1')
+app.include_router(endpoints.ping.router)
 
 
 @app.exception_handler(exceptions.PrivateDodoAPIError)
