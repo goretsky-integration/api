@@ -5,6 +5,8 @@ from pydantic import BaseSettings, Field
 
 __all__ = (
     'app_settings',
+    'ROOT_PATH',
+    'APP_USER_AGENT',
 )
 
 load_dotenv()
@@ -17,6 +19,7 @@ class AppSettings(BaseSettings):
     port: int = Field(..., env='APP_PORT')
     host: str = Field(..., env='APP_HOST')
     is_debug: bool = Field(..., env='IS_DEBUG')
+    redis_url: str = Field(..., env='REDIS_URL')
 
 
 app_settings = AppSettings()
