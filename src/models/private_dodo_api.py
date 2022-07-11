@@ -59,7 +59,7 @@ class StopSalesBySalesChannels(StopSales):
     sales_channel_name: str = Field(alias='salesChannelName')
 
 
-class OrdersHandoverTime(StopSales):
+class OrdersHandoverTime(BaseModel):
     unit_id: uuid.UUID = Field(alias='unitId')
     unit_name: str = Field(alias='unitName')
     order_id: uuid.UUID = Field(alias='orderId')

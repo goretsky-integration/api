@@ -9,8 +9,9 @@ __all__ = (
 )
 
 app = FastAPI()
-app.include_router(endpoints.statistics.router, prefix='/v1')
-app.include_router(endpoints.stop_sales.router, prefix='/v1')
+app.include_router(endpoints.v2.statistics.router)
+app.include_router(endpoints.v1.statistics.router)
+app.include_router(endpoints.v2.stop_sales.router)
 app.include_router(endpoints.ping.router)
 
 

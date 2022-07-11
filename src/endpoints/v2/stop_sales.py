@@ -6,7 +6,7 @@ from fastapi import APIRouter, Query
 import models
 from services.api import private_dodo_api
 
-router = APIRouter(prefix='/stop-sales', tags=['Stop sales'])
+router = APIRouter(prefix='/v2/stop-sales', tags=['Stop sales'])
 
 
 @router.get(

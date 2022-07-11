@@ -12,7 +12,7 @@ class PrivateDodoAPIError(Exception):
         self.status_code = status_code
 
 
-class KitchenStatisticsError(DodoISAPIError):
+class PartialStatisticsAPIError(DodoISAPIError):
 
     def __init__(self, *args, unit_id: int | str, **kwargs):
         self.unit_id = unit_id
@@ -24,3 +24,13 @@ class OperationalStatisticsAPIError(PublicDodoAPIError):
     def __init__(self, *args, unit_id: int | str, **kwargs):
         self.unit_id = unit_id
         super(*args, **kwargs)
+
+
+class DoesNotExistInCache(Exception):
+
+    def __init__(self, *args, key: str, **kwargs):
+        self.key = key
+        super(*args, **kwargs)
+
+    def __str__(self):
+        return f'Object with {self.key=} has not been found'

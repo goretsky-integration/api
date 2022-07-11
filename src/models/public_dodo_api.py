@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 __all__ = (
     'OperationalStatistics',
-    'OperationalStatisticsForTodayAndWeekBefore',
+    'UnitOperationalStatisticsForTodayAndWeekBefore',
 )
 
 
@@ -18,7 +18,7 @@ class OperationalStatistics(BaseModel):
     avg_check: float = Field(..., alias='avgCheck')
 
 
-class OperationalStatisticsForTodayAndWeekBefore(BaseModel):
+class UnitOperationalStatisticsForTodayAndWeekBefore(BaseModel):
     unit_id: int = Field(..., alias='unitId')
     date: datetime
     today: OperationalStatistics
@@ -29,5 +29,3 @@ class OperationalStatisticsForTodayAndWeekBefore(BaseModel):
 
     class Config:
         allow_population_by_field_name = True
-
-

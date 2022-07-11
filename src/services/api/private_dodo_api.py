@@ -1,5 +1,4 @@
 import uuid
-from datetime import datetime
 from typing import Iterable
 
 import httpx
@@ -13,11 +12,10 @@ from utils import time_utils, exceptions
 async def get_delivery_statistics(
         token: str,
         unit_uuids: Iterable[uuid.UUID],
-        from_datetime: datetime | None = None,
-        to_datetime: datetime | None = None,
+        datetime_config: time_utils.Period
 ) -> list[models.UnitDeliveryStatistics]:
     url = 'https://api.dodois.io/dodopizza/ru/delivery/statistics/'
-    response_json = await request_to_private_dodo_api(url, token, unit_uuids, from_datetime, to_datetime)
+    response_json = await request_to_private_dodo_api(url, token, unit_uuids, datetime_config)
     return parse_obj_as(list[models.UnitDeliveryStatistics],
                         response_json['unitsStatistics'])
 
@@ -25,11 +23,10 @@ async def get_delivery_statistics(
 async def get_ingredient_stop_sales(
         token: str,
         unit_uuids: Iterable[uuid.UUID],
-        from_datetime: datetime,
-        to_datetime: datetime,
+        datetime_config: time_utils.Period,
 ) -> list[models.StopSalesByIngredients]:
     url = 'https://api.dodois.io/dodopizza/ru/production/stop-sales-ingredients'
-    ingredient_stop_sales = await request_to_private_dodo_api(url, token, unit_uuids, from_datetime, to_datetime)
+    ingredient_stop_sales = await request_to_private_dodo_api(url, token, unit_uuids, datetime_config)
     return parse_obj_as(list[models.StopSalesByIngredients],
                         ingredient_stop_sales['stopSalesByIngredients'])
 
@@ -37,11 +34,10 @@ async def get_ingredient_stop_sales(
 async def get_channels_stop_sales(
         token: str,
         unit_uuids: Iterable[uuid.UUID],
-        from_datetime: datetime,
-        to_datetime: datetime,
+        datetime_config: time_utils.Period,
 ) -> list[models.StopSalesBySalesChannels]:
     url = 'https://api.dodois.io/dodopizza/ru/production/stop-sales-channels'
-    channels_stop_sales = await request_to_private_dodo_api(url, token, unit_uuids, from_datetime, to_datetime)
+    channels_stop_sales = await request_to_private_dodo_api(url, token, unit_uuids, datetime_config)
     return parse_obj_as(list[models.StopSalesBySalesChannels],
                         channels_stop_sales['stopSalesBySalesChannels'])
 
@@ -49,11 +45,10 @@ async def get_channels_stop_sales(
 async def get_products_stop_sales(
         token: str,
         unit_uuids: Iterable[uuid.UUID],
-        from_datetime: datetime,
-        to_datetime: datetime,
+        datetime_config: time_utils.Period,
 ) -> list[models.StopSalesByProduct]:
     url = 'https://api.dodois.io/dodopizza/ru/production/stop-sales-products'
-    products_stop_sales = await request_to_private_dodo_api(url, token, unit_uuids, from_datetime, to_datetime)
+    products_stop_sales = await request_to_private_dodo_api(url, token, unit_uuids, datetime_config)
     return parse_obj_as(list[models.StopSalesByProduct],
                         products_stop_sales['stopSalesByProducts'])
 
@@ -61,11 +56,10 @@ async def get_products_stop_sales(
 async def get_production_statistics(
         token: str,
         unit_uuids: Iterable[uuid.UUID],
-        from_datetime: datetime | None = None,
-        to_datetime: datetime | None = None,
+        datetime_config: time_utils.Period,
 ) -> list[models.OrdersHandoverTime]:
     url = 'https://api.dodois.io/dodopizza/ru/production/orders-handover-time'
-    response_json = await request_to_private_dodo_api(url, token, unit_uuids, from_datetime, to_datetime)
+    response_json = await request_to_private_dodo_api(url, token, unit_uuids, datetime_config)
     return parse_obj_as(list[models.OrdersHandoverTime], response_json['ordersHandoverTime'])
 
 
@@ -73,21 +67,16 @@ async def request_to_private_dodo_api(
         url: str,
         token: str,
         unit_uuids: Iterable[uuid.UUID],
-        from_datetime: datetime | None = None,
-        to_datetime: datetime | None = None,
+        datetime_config: time_utils.Period,
 ) -> dict:
-    if from_datetime is None:
-        from_datetime = time_utils.get_moscow_datetime_now()
-    if to_datetime is None:
-        to_datetime = time_utils.get_moscow_datetime_now()
     headers = {
         'User-Agent': config.APP_USER_AGENT,
         'Authorization': f'Bearer {token}',
     }
     params = {
         'units': ','.join([i.hex for i in unit_uuids]),
-        'from': from_datetime.strftime('%Y-%m-%dT00:00:00'),
-        'to': to_datetime.strftime('%Y-%m-%dT%H:%M:%S'),
+        'from': datetime_config.from_datetime.strftime('%Y-%m-%dT00:00:00'),
+        'to': datetime_config.to_datetime.strftime('%Y-%m-%dT%H:%M:%S'),
     }
     async with httpx.AsyncClient() as client:
         response = await client.get(url, params=params, headers=headers)

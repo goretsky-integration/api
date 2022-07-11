@@ -4,9 +4,10 @@ __all__ = (
     'calculate_revenue_delta_in_percents',
     'calculate_delivery_with_courier_app_percent',
     'calculate_orders_for_courier_count_per_hour',
-    'calculate_orders_percentage_with_phone_numbers',
+    'calculate_orders_with_phone_number_percent',
     'calculate_couriers_workload',
     'calculate_revenue_metadata',
+    'calculate_orders_count_delta',
 )
 
 SECONDS_IN_HOUR = 3600
@@ -28,32 +29,13 @@ def calculate_revenue_delta_in_percents(revenue_today: int | float,
     return round(revenue_today / revenue_week_before * 100) - 100
 
 
-def calculate_orders_percentage_with_phone_numbers(
-        orders_with_phone_numbers_count: int,
-        total_orders_count: int,
-) -> int:
-    """
-    Examples:
-        >>> calculate_orders_percentage_with_phone_numbers(10, 40)
-        25
-        >>> calculate_orders_percentage_with_phone_numbers(0, 0)
-        0
-
-    Returns:
-        Orders with phone numbers percentage.
-    """
-    if total_orders_count == 0:
-        return 0
-    return round(orders_with_phone_numbers_count / total_orders_count * 100)
-
-
 def calculate_orders_for_courier_count_per_hour(
         delivery_orders_count: int,
         couriers_shift_duration: int,
 ) -> float:
     if couriers_shift_duration == 0:
         return 0
-    return round(delivery_orders_count / (couriers_shift_duration / SECONDS_IN_HOUR), 1)
+    return round(delivery_orders_count / (couriers_shift_duration / SECONDS_IN_HOUR), 2)
 
 
 def calculate_delivery_with_courier_app_percent(
@@ -85,3 +67,15 @@ def calculate_revenue_metadata(
         total_revenue_week_before=total_revenue_week_before,
         total_revenue_today=total_revenue_today,
     )
+
+
+def calculate_orders_count_delta(today: float, week_before: float) -> float:
+    if week_before == 0:
+        return 0
+    return round(today * 100 / week_before - 100, 2)
+
+
+def calculate_orders_with_phone_number_percent(with_phone_numbers: int, total: int) -> float:
+    if total == 0:
+        return 0
+    return round(with_phone_numbers / total * 100, 2)

@@ -1,5 +1,4 @@
 import asyncio
-from dataclasses import dataclass
 from typing import Iterable, TypeAlias
 
 import httpx
@@ -11,22 +10,15 @@ from utils import exceptions
 __all__ = (
     'get_operational_statistics_for_today_and_week_before',
     'get_operational_statistics_for_today_and_week_before_batch',
-    'OperationalStatisticsBatch',
 )
 
 OperationalStatisticsAPIResponse: TypeAlias = (
-        models.OperationalStatisticsForTodayAndWeekBefore | exceptions.OperationalStatisticsAPIError)
-
-
-@dataclass(slots=True, frozen=True)
-class OperationalStatisticsBatch:
-    success_responses: list[models.OperationalStatisticsForTodayAndWeekBefore]
-    error_unit_ids: list[int]
+        models.UnitOperationalStatisticsForTodayAndWeekBefore | exceptions.OperationalStatisticsAPIError)
 
 
 async def get_operational_statistics_for_today_and_week_before(
         unit_id: int | str,
-) -> models.OperationalStatisticsForTodayAndWeekBefore:
+) -> models.UnitOperationalStatisticsForTodayAndWeekBefore:
     """Get operational statistics for exact unit.
 
     Args:
@@ -44,12 +36,12 @@ async def get_operational_statistics_for_today_and_week_before(
         response = await client.get(url=url, headers=headers)
         if not response.is_success:
             raise exceptions.OperationalStatisticsAPIError(unit_id=unit_id)
-        return models.OperationalStatisticsForTodayAndWeekBefore.parse_obj(response.json())
+        return models.UnitOperationalStatisticsForTodayAndWeekBefore.parse_obj(response.json())
 
 
 async def get_operational_statistics_for_today_and_week_before_batch(
         unit_ids: Iterable[int | str],
-) -> OperationalStatisticsBatch:
+) -> models.OperationalStatisticsBatch:
     """Get operational statistics for batch of units more quickly.
 
     Args:
@@ -61,13 +53,14 @@ async def get_operational_statistics_for_today_and_week_before_batch(
     """
     tasks = (get_operational_statistics_for_today_and_week_before(unit_id) for unit_id in unit_ids)
     responses: tuple[OperationalStatisticsAPIResponse, ...] = await asyncio.gather(*tasks, return_exceptions=True)
-    return OperationalStatisticsBatch(
-        success_responses=[
-            response for response in responses
-            if isinstance(response, models.OperationalStatisticsForTodayAndWeekBefore)
-        ],
-        error_unit_ids=[
-            response.unit_id for response in responses
-            if isinstance(response, exceptions.OperationalStatisticsAPIError)
-        ]
-    )
+
+    units: list[models.UnitOperationalStatisticsForTodayAndWeekBefore] = []
+    error_unit_ids: list[int] = []
+    for response in responses:
+        match response:
+            case models.UnitOperationalStatisticsForTodayAndWeekBefore():
+                units.append(response)
+            case exceptions.OperationalStatisticsAPIError():
+                error_unit_ids.append(response.unit_id)
+
+    return models.OperationalStatisticsBatch(units=units, error_unit_ids=error_unit_ids)

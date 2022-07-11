@@ -1,1 +1,3 @@
-from . import statistics, stop_sales, ping
+from . import ping, v2
+from .v2 import stop_sales
+from .v1 import statistics
