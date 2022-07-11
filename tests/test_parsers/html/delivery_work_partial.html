@@ -1,0 +1,144 @@
+
+
+<div class="panel panel-blue">
+<div class="panel-heading">
+	<h3 class="panel-title">
+		Доставка
+	</h3>
+</div>
+<div class="panel-body operationalStatistics_panelBody">
+	<div id="deliveryWorkBlock">
+		<div class="operationalStatistics_panelBoxWrap">
+			<div class="operationalStatistics_panelBox operationalStatistics_panelBox--half operationalStatistics_panelBox--halfFullMobile operationalStatistics_panelBox--fixedHeight">
+				<div>Заказов на курьера в час</div>
+				<h1 class="operationalStatistics_panelTitle">
+					2,1
+					<span class="badge badge-success operationalStatistics_badge">&#x2B;16%</span>
+				</h1>
+				<div class="operationalStatistics_weekAgo">1,8 неделю назад</div>
+			</div>
+			<div class="operationalStatistics_panelBox operationalStatistics_panelBox--half operationalStatistics_panelBox--halfFullMobile operationalStatistics_panelBox--fixedHeight">
+				<div>Заказов за поездку</div>
+				<h1 class="operationalStatistics_panelTitle">
+					1,5
+					<span class="badge  operationalStatistics_badge">0%</span>
+				</h1>
+				<div class="operationalStatistics_weekAgo">1,5 неделю назад</div>
+			</div>
+		</div>
+		<div class="operationalStatistics_panelBox">
+			<div>Заказы на доставку</div>
+			<div class="operationalStatistics_legend">
+				<div class="operationalStatistics_legendItem operationalStatistics_legendItem--now">сейчас</div>
+				<div class="operationalStatistics_legendItem">прогноз</div>
+			</div>
+			<div class="operationalStatistics_chart">
+				<canvas id="workBarChart" height="132" width="405"></canvas>
+			</div>
+		</div>
+
+		<div class="operationalStatistics_panelBoxWrap">
+			<div class="operationalStatistics_panelBox operationalStatistics_panelBox--half operationalStatistics_panelBox--fixedHeight">
+				<div>Заказов остывает на&nbsp;полке</div>
+				<h1 class="operationalStatistics_panelTitle">1</h1>
+			</div>
+			<div class="operationalStatistics_panelBox operationalStatistics_panelBox--half operationalStatistics_panelBox--fixedHeight">
+				<div>Курьеры всего / в&nbsp;очереди</div>
+				<h1 class="operationalStatistics_panelTitle">9 / 4</h1>
+			</div>
+		</div>
+
+		<div class="operationalStatistics_lastPanelBoxWrap">
+			<div class="operationalStatistics_panelBox operationalStatistics_panelBox--half operationalStatistics_panelBox--autoHeight">
+				<div>Сертификатов отдано</div>
+				<h1 class="operationalStatistics_panelTitle">0<span class="operationalStatistics_panelTitle--small"> (0%)</span></h1>
+			</div>
+			<div class="operationalStatistics_panelBox operationalStatistics_panelBox--half operationalStatistics_panelBox--autoHeight">
+				<div>Время ожидания доставки</div>
+				<h1 class="operationalStatistics_panelTitle">05:21</h1>
+			</div>
+		</div>
+
+	</div>
+</div>
+</div>
+
+<script>
+	var revenueTodayData = [0,0,0,0,0,0,0,0,0,0,14,12,14,16,16,16,17,31,28,26,32,6,0,0];
+	var revenueWeekAgoData = [0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,10.0,9.0,14.7,17.0,16.0,19.7,21.3,24.0,27.0,30.7,24.0,19.3,14.7,4.7];
+    var ctx = document.getElementById("workBarChart").getContext('2d');
+	ctx.getImageData(0,0,1,1);
+
+    var productivityBarChart = new Chart(ctx, {
+		plugins: [new TrackingLinePlugin(), new CustomLabelPlugin()],
+        type: 'line',
+        data: {
+            labels: ["0 ч.", "", "", "3", "", "", "6", "", "", "9", "", "", "12", "", "", "15", "", "", "18", "", "", "21", "", "", "0"],
+            datasets: [
+                {
+                    label: 'сейчас',
+                    fill: false,
+                    borderColor: "#397AE8",
+                    borderWidth: "1px",
+                    pointRadius: 2,
+                    pointHoverRadius: 2,
+                    pointBackgroundColor: "#ffffff",
+                    lineTension: 0,
+                    data: revenueTodayData
+                },
+                {
+                    label: 'прогноз',
+                    fill: false,
+                    borderColor: "#a4a4a4",
+                    borderWidth: "1px",
+                    pointRadius: 2,
+                    pointHoverRadius: 2,
+                    pointBackgroundColor: "#ffffff",
+                    lineTension: 0,
+                    data: revenueWeekAgoData
+                }
+            ]
+        },
+        options: {
+			maintainAspectRatio: false,
+			tooltips: {
+				enabled: false
+			},
+            scales: {
+                yAxes: [{
+					gridLines: {
+						drawTicks: false,
+						drawBorder: false
+					},
+					ticks: {
+						padding: 25,
+						display: false,
+						maxTicksLimit: 4,
+						min: 0,
+						suggestedMin: 0,
+						beginAtZero: true, // Чтобы график не уходил в минус, когда нет данных
+						fontColor: '#989898'
+					}
+				}],
+                xAxes: [{
+                    gridLines: {
+                        display: false,
+						offsetGridLines: true
+                    },
+                    ticks: {
+                        autoSkip: false,
+                        maxRotation: 0,
+                        minRotation: 0,
+						fontColor: '#989898'
+                    }
+                }]
+            },
+            legend: {
+                display: false
+            },
+			trackingLine: {
+				precision: 1
+			}
+        }
+    });
+</script>
