@@ -42,7 +42,7 @@ class RevenueForTodayAndWeekBeforeStatistics(BaseModel):
 
 
 class RevenueStatistics(BaseModel):
-    revenues: list[RevenueForTodayAndWeekBeforeStatistics]
+    units: list[RevenueForTodayAndWeekBeforeStatistics]
     metadata: UnitsRevenueMetadata
     error_unit_ids: list[int]
 

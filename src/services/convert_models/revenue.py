@@ -27,7 +27,7 @@ def operational_statistics_to_revenue_statistics(
                           for operational_statistics in operational_statistics_batch.units]
     revenue_metadata = calculate_revenue_metadata(revenue_statistics)
     return models.RevenueStatistics(
-        revenues=revenue_statistics,
+        units=revenue_statistics,
         metadata=revenue_metadata,
         error_unit_ids=operational_statistics_batch.error_unit_ids,
     )
