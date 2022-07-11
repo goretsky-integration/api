@@ -82,6 +82,6 @@ async def get_bonus_system_statistics(
 )
 async def get_being_late_certificates_today_and_week_before(
         cookies: dict = Body(...),
-        unit_ids_and_names: list[models.UnitIdAndName] = Body(...),
+        units: list[models.UnitIdAndName] = Body(...),
 ):
-    return await orders.get_being_late_certificates_statistics(cookies, unit_ids_and_names)
+    return await orders.get_being_late_certificates_statistics(cookies, units)

@@ -90,8 +90,8 @@ class BeingLateCertificatesParser(HTMLParser):
     def __init__(self, html: str, request_unit_id: int, units: Iterable[models.UnitIdAndName]):
         super().__init__(html)
         self._request_unit_id = request_unit_id
-        self._unit_id_to_unit: dict[int, models.UnitIdAndName] = {unit.unit_id: unit for unit in units}
-        self._unit_name_to_unit: dict[str, models.UnitIdAndName] = {unit.unit_name: unit for unit in units}
+        self._unit_id_to_unit: dict[int, models.UnitIdAndName] = {unit.id: unit for unit in units}
+        self._unit_name_to_unit: dict[str, models.UnitIdAndName] = {unit.name: unit for unit in units}
 
     def parse(self) -> list[models.UnitBeingLateCertificates]:
         if 'данные не найдены' in self._soup.text.strip().lower():
@@ -101,7 +101,7 @@ class BeingLateCertificatesParser(HTMLParser):
             return [
                 models.UnitBeingLateCertificates(
                     unit_id=self._request_unit_id,
-                    unit_name=self._unit_id_to_unit[self._request_unit_id].unit_name,
+                    unit_name=self._unit_id_to_unit[self._request_unit_id].name,
                     being_late_certificates_count=len(df.index),
                 )
             ]

@@ -17,7 +17,7 @@ async def get_being_late_certificates(
         units: Iterable[models.UnitIdAndName],
         datetime_config: time_utils.Period,
 ) -> list[models.UnitBeingLateCertificates]:
-    unit_ids = [unit.unit_id for unit in units]
+    unit_ids = [unit.id for unit in units]
     url = 'https://officemanager.dodopizza.ru/Reports/BeingLateCertificates/Get'
     data = {
         'unitsIds': unit_ids,

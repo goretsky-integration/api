@@ -16,15 +16,15 @@ async def get_restaurant_orders(
         units: Iterable[models.UnitIdAndName],
         datetime_config: time_utils.Period,
 ) -> list[GroupedByUnitName]:
-    unit_name_to_unit_id = {unit.unit_name: unit.unit_id for unit in units}
+    unit_name_to_unit_id = {unit.name: unit.id for unit in units}
     units_restaurant_orders: list[GroupedByUnitName] = []
     unit_ids_to_get_from_api = []
     for unit in units:
-        key = f'restaurant_orders@{unit.unit_id}'
+        key = f'restaurant_orders@{unit.id}'
         try:
             grouped_by_unit_name_df: GroupedByUnitName = await get_from_cache(key)
         except exceptions.DoesNotExistInCache:
-            unit_ids_to_get_from_api.append(unit.unit_id)
+            unit_ids_to_get_from_api.append(unit.id)
         else:
             units_restaurant_orders.append(grouped_by_unit_name_df)
 
@@ -51,11 +51,11 @@ def zip_certificates_today_and_week_before(
                                                  for report in certificates_week_before}
     result = []
     for unit in units:
-        certificates_today_count = certificates_today_unit_id_to_count.get(unit.unit_id, 0)
-        certificates_week_before_count = certificates_week_before_unit_id_to_count.get(unit.unit_id, 0)
+        certificates_today_count = certificates_today_unit_id_to_count.get(unit.id, 0)
+        certificates_week_before_count = certificates_week_before_unit_id_to_count.get(unit.id, 0)
         result.append(models.UnitBeingLateCertificatesTodayAndWeekBefore(
-            unit_id=unit.unit_id,
-            unit_name=unit.unit_name,
+            unit_id=unit.id,
+            unit_name=unit.name,
             certificates_today_count=certificates_today_count,
             certificates_week_before_count=certificates_week_before_count,
         ))
@@ -73,7 +73,7 @@ async def get_being_late_certificates_statistics(
     all_certificates_for_today_and_week_before: list[models.UnitBeingLateCertificatesTodayAndWeekBefore] = []
 
     for unit in units:
-        key = f'being_late_certificates@{unit.unit_id}'
+        key = f'being_late_certificates@{unit.id}'
         try:
             unit_being_late_certificates = await get_from_cache(key)
         except exceptions.DoesNotExistInCache:
