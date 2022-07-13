@@ -107,7 +107,7 @@ class BeingLateCertificatesParser(HTMLParser):
             ]
         return [
             models.UnitBeingLateCertificates(
-                unit_id=self._unit_name_to_unit[unit_name].unit_id,
+                unit_id=self._unit_name_to_unit[unit_name].id,
                 unit_name=unit_name,
                 being_late_certificates_count=len(group.index)
             ) for unit_name, group in df.groupby('Пиццерия')
