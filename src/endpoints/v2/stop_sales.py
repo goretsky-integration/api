@@ -5,6 +5,7 @@ from fastapi import APIRouter, Query
 
 import models
 from services.api import private_dodo_api
+from utils import time_utils
 
 router = APIRouter(prefix='/v2/stop-sales', tags=['Stop sales'])
 
@@ -20,7 +21,8 @@ async def get_ingredient_stop_sales(
         from_datetime: datetime | None = Query(None, description='Today unless specified'),
         to_datetime: datetime | None = Query(None, description='Current datetime unless specified'),
 ):
-    return await private_dodo_api.get_ingredient_stop_sales(token, unit_uuids, from_datetime, to_datetime)
+    period = time_utils.Period(from_datetime, to_datetime)
+    return await private_dodo_api.get_ingredient_stop_sales(token, unit_uuids, period)
 
 
 @router.get(
@@ -34,7 +36,8 @@ async def get_channels_stop_sales(
         from_datetime: datetime | None = Query(None, description='Today unless specified'),
         to_datetime: datetime | None = Query(None, description='Current datetime unless specified'),
 ):
-    return await private_dodo_api.get_channels_stop_sales(token, unit_uuids, from_datetime, to_datetime)
+    period = time_utils.Period(from_datetime, to_datetime)
+    return await private_dodo_api.get_channels_stop_sales(token, unit_uuids, period)
 
 
 @router.get(
@@ -48,4 +51,5 @@ async def get_products_stop_sales(
         from_datetime: datetime | None = Query(None, description='Today unless specified'),
         to_datetime: datetime | None = Query(None, description='Current datetime unless specified'),
 ):
-    return await private_dodo_api.get_products_stop_sales(token, unit_uuids, from_datetime, to_datetime)
+    period = time_utils.Period(from_datetime, to_datetime)
+    return await private_dodo_api.get_products_stop_sales(token, unit_uuids, period)
