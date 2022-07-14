@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
 
 
 @dataclass
@@ -12,6 +12,10 @@ class Period:
             self.from_datetime = self.new_today().from_datetime
         if self.to_datetime is None:
             self.to_datetime = self.new_today().to_datetime
+        if isinstance(self.from_datetime, date):
+            self.from_datetime = datetime(self.from_datetime.year, self.from_datetime.month, self.from_datetime.day)
+        if isinstance(self.to_datetime, date):
+            self.to_datetime = datetime(self.to_datetime.year, self.to_datetime.month, self.to_datetime.day)
 
     @staticmethod
     def now() -> datetime:

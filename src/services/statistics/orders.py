@@ -94,3 +94,23 @@ async def get_being_late_certificates_statistics(
             await set_in_cache(key, unit_certificates)
         all_certificates_for_today_and_week_before += certificates_for_today_and_week_before
     return all_certificates_for_today_and_week_before
+
+
+async def get_canceled_orders(cookies: dict, date: time_utils.Period) -> list[models.OrderByUUID]:
+    tasks = []
+    all_canceled_orders = []
+    async for canceled_orders_partial in dodo_is_api.get_canceled_orders_partial(cookies, date):
+        if not canceled_orders_partial:
+            continue
+        for canceled_order_partial in canceled_orders_partial:
+            tasks.append(dodo_is_api.get_order_by_uuid(
+                cookies, canceled_order_partial.uuid,
+                canceled_order_partial.price, canceled_order_partial.type))
+    responses = await asyncio.gather(*tasks, return_exceptions=True)
+    all_canceled_orders += [response for response in responses if isinstance(response, models.OrderByUUID)]
+    error_responses = [response for response in responses if isinstance(response, exceptions.OrderByUUIDAPIError)]
+    while error_responses:
+        responses = await asyncio.gather(*tasks, return_exceptions=True)
+        all_canceled_orders += [response for response in responses if isinstance(response, models.OrderByUUID)]
+        error_responses = [response for response in responses if isinstance(response, exceptions.OrderByUUIDAPIError)]
+    return all_canceled_orders
