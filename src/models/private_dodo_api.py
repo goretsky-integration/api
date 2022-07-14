@@ -1,8 +1,9 @@
 import uuid
 from datetime import datetime
-from typing import TypeVar
 
 from pydantic import BaseModel, Field, NonNegativeInt, validator
+
+from models.validators import get_or_none
 
 __all__ = (
     'UnitDeliveryStatistics',
@@ -11,12 +12,6 @@ __all__ = (
     'StopSalesBySalesChannels',
     'OrdersHandoverTime',
 )
-
-T = TypeVar('T')
-
-
-def get_or_none(value: T) -> T | None:
-    return value or None
 
 
 class UnitDeliveryStatistics(BaseModel):

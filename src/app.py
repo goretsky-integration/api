@@ -11,6 +11,7 @@ __all__ = (
 app = FastAPI()
 app.include_router(endpoints.v2.statistics.router)
 app.include_router(endpoints.v1.statistics.router)
+app.include_router(endpoints.v1.canceled_orders.router)
 app.include_router(endpoints.v2.stop_sales.router)
 app.include_router(endpoints.ping.router)
 
