@@ -6,7 +6,7 @@ import models
 from services.statistics import orders
 from utils import time_utils
 
-router = APIRouter(prefix='/v1', tags=['Shift Manager'])
+router = APIRouter(prefix='/v1', tags=['Orders'])
 
 
 @router.post(

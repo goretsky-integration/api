@@ -4,8 +4,8 @@ from datetime import datetime, timedelta, date
 
 @dataclass
 class Period:
-    from_datetime: datetime | None = None
-    to_datetime: datetime | None = None
+    from_datetime: datetime | date | None = None
+    to_datetime: datetime | date | None = None
 
     def __post_init__(self):
         if self.from_datetime is None:
