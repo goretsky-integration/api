@@ -17,6 +17,9 @@ __all__ = (
     'DeliveryStatisticsHTMLParser',
     'OrdersPartial',
     'OrderByUUIDParser',
+    'HTMLParser',
+    'SectorStopSalesHTMLParser',
+    'StreetStopSalesHTMLParser',
 )
 
 import models.dodo_is_api.partial_statistics.kitchen
@@ -205,3 +208,34 @@ class OrderByUUIDParser(HTMLParser):
             price=self._order_price,
             type=self._order_type,
         )
+
+
+class SectorStopSalesHTMLParser(HTMLParser):
+    def parse(self) -> list[models.StopSalesBySector]:
+        trs = self._soup.find('table', id='bootgrid-table').find('tbody').find_all('tr')
+        nested_trs = [[td.text.strip() for td in tr.find_all('td')] for tr in trs]
+        return [
+            models.StopSalesBySector(
+                unit_name=tds[0],
+                sector=tds[1],
+                started_at=tds[2],
+                staff_name_who_stopped=tds[3],
+                staff_name_who_resumed=tds[5],
+            ) for tds in nested_trs
+        ]
+
+
+class StreetStopSalesHTMLParser(HTMLParser):
+    def parse(self) -> list[models.StopSalesByStreet]:
+        trs = self._soup.find('table', id='bootgrid-table').find_all('tr')[1:]
+        nested_trs = [[td.text.strip() for td in tr.find_all('td')] for tr in trs]
+        return [
+            models.StopSalesByStreet(
+                unit_name=tds[0],
+                started_at=tds[3],
+                staff_name_who_stopped=tds[4],
+                staff_name_who_resumed=tds[6],
+                sector=tds[1],
+                street=tds[2],
+            ) for tds in nested_trs
+        ]
