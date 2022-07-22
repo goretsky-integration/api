@@ -3,7 +3,7 @@ import uuid
 from pydantic import BaseModel, NonNegativeFloat, NonNegativeInt
 
 from models import UnitOperationalStatisticsForTodayAndWeekBefore
-from models.private_dodo_api import UnitDeliveryStatistics
+from models.private_dodo_api import UnitDeliveryStatistics, SalesChannel
 
 __all__ = (
     'RevenueForTodayAndWeekBeforeStatistics',
@@ -25,6 +25,7 @@ __all__ = (
     'CouriersStatistics',
     'KitchenProductionStatistics',
     'UnitKitchenProduction',
+    'UnitOrdersHandoverTime',
 )
 
 
@@ -140,3 +141,12 @@ class UnitKitchenProduction(BaseModel):
 class KitchenProductionStatistics(BaseModel):
     units: list[UnitKitchenProduction]
     error_unit_ids: list[int]
+
+
+class UnitOrdersHandoverTime(BaseModel):
+    unit_uuid: uuid.UUID
+    unit_name: str
+    average_tracking_pending_time: int
+    average_cooking_time: int
+    average_heated_shelf_time: int
+    sales_channels: list[SalesChannel]

@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from enum import Enum
 
 from pydantic import BaseModel, Field, NonNegativeInt, validator
 
@@ -11,6 +12,7 @@ __all__ = (
     'StopSalesByIngredients',
     'StopSalesBySalesChannels',
     'OrdersHandoverTime',
+    'SalesChannel',
 )
 
 
@@ -54,12 +56,18 @@ class StopSalesBySalesChannels(StopSales):
     sales_channel_name: str = Field(alias='salesChannelName')
 
 
+class SalesChannel(Enum):
+    DINE_IN = 'Dine-in'
+    TAKEAWAY = 'Takeaway'
+    DELIVERY = 'Delivery'
+
+
 class OrdersHandoverTime(BaseModel):
     unit_id: uuid.UUID = Field(alias='unitId')
     unit_name: str = Field(alias='unitName')
     order_id: uuid.UUID = Field(alias='orderId')
     order_number: str = Field(alias='orderNumber')
-    sales_channel: str = Field(alias='salesChannel')
+    sales_channel: SalesChannel = Field(alias='salesChannel')
     orders_tracking_start_at: datetime = Field(alias='orderTrackingStartAt')
     tracking_pending_time: int = Field(alias='trackingPendingTime')
     cooking_time: int = Field(alias='cookingTime')
