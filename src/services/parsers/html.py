@@ -255,13 +255,16 @@ class StockBalanceHTMLParser(HTMLParser):
             tds = tr.find_all('td')
             if len(tds) != 6:
                 continue
-            ingredient_name, _, _, _, _, days_left = [td.text.strip() for td in tds]
+            ingredient_name, stocks_count, _, _, _, days_left = [td.text.strip() for td in tds]
             if not days_left.isdigit():
                 continue
-            ingredient_name = ','.join(ingredient_name.split(',')[:-1])
+            *ingredient_name_parts, stocks_unit = ingredient_name.split(',')
+            ingredient_name = ','.join(ingredient_name_parts)
             result.append(models.StockBalance(
                 unit_id=self.unit_id,
                 ingredient_name=ingredient_name,
                 days_left=days_left,
+                stocks_unit=stocks_unit.strip(),
+                stocks_count=stocks_count.strip().replace(',', '.').replace(' ', ''),
             ))
         return result
