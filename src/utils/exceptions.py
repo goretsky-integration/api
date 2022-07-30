@@ -1,21 +1,54 @@
+"""
+- DodoAPIError
+    - PublicDodoAPIError
+        - OperationalStatisticsAPIError
+    - DodoISAPIError
+        - OfficeManagerAPIError
+            - PartialStatisticsAPIError
+        - ShiftManagerAPIError
+            - OrdersPartialAPIError
+            - OrderByUUIDAPIError
+    - PrivateDodoAPIError
+- DoesNotExistInCache
+"""
+
 import uuid
 
 
-class PublicDodoAPIError(Exception):
+class DodoAPIError(Exception):
     pass
 
 
-class DodoISAPIError(Exception):
+class PublicDodoAPIError(DodoAPIError):
     pass
 
 
-class PrivateDodoAPIError(Exception):
+class DodoISAPIError(DodoAPIError):
+    pass
+
+
+class OfficeManagerAPIError(DodoISAPIError):
+    pass
+
+
+class StocksBalanceAPIError(OfficeManagerAPIError):
+
+    def __init__(self, *args, unit_id: int):
+        super().__init__(*args)
+        self.unit_id = unit_id
+
+
+class ShiftManagerAPIError(DodoISAPIError):
+    pass
+
+
+class PrivateDodoAPIError(DodoAPIError):
 
     def __init__(self, *args, status_code: int, **kwargs):
         self.status_code = status_code
 
 
-class PartialStatisticsAPIError(DodoISAPIError):
+class PartialStatisticsAPIError(OfficeManagerAPIError):
 
     def __init__(self, *args, unit_id: int | str, **kwargs):
         self.unit_id = unit_id
@@ -37,10 +70,6 @@ class DoesNotExistInCache(Exception):
 
     def __str__(self):
         return f'Object with {self.key=} has not been found'
-
-
-class ShiftManagerAPIError(DodoISAPIError):
-    pass
 
 
 class OrdersPartialAPIError(ShiftManagerAPIError):

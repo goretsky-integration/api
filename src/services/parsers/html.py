@@ -20,6 +20,7 @@ __all__ = (
     'HTMLParser',
     'SectorStopSalesHTMLParser',
     'StreetStopSalesHTMLParser',
+    'StockBalanceHTMLParser',
 )
 
 import models.dodo_is_api.partial_statistics.kitchen
@@ -239,3 +240,28 @@ class StreetStopSalesHTMLParser(HTMLParser):
                 street=tds[2],
             ) for tds in nested_trs
         ]
+
+
+class StockBalanceHTMLParser(HTMLParser):
+
+    def __init__(self, html: str, unit_id: int):
+        super().__init__(html)
+        self.unit_id = unit_id
+
+    def parse(self) -> list[models.StockBalance]:
+        trs = self._soup.find('tbody').find_all('tr')
+        result: list[models.StockBalance] = []
+        for tr in trs:
+            tds = tr.find_all('td')
+            if len(tds) != 6:
+                continue
+            ingredient_name, _, _, _, _, days_left = [td.text.strip() for td in tds]
+            if not days_left.isdigit():
+                continue
+            ingredient_name = ','.join(ingredient_name.split(',')[:-1])
+            result.append(models.StockBalance(
+                unit_id=self.unit_id,
+                ingredient_name=ingredient_name,
+                days_left=days_left,
+            ))
+        return result

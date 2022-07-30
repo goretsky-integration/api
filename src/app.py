@@ -15,6 +15,7 @@ app.include_router(endpoints.v1.canceled_orders.router)
 app.include_router(endpoints.v1.cheated_orders.router)
 app.include_router(endpoints.v2.stop_sales.router)
 app.include_router(endpoints.v1.stop_sales.router)
+app.include_router(endpoints.v1.stocks.router)
 app.include_router(endpoints.ping.router)
 
 
