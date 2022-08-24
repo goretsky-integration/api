@@ -198,7 +198,7 @@ class OrderByUUIDParser(HTMLParser):
             msg = msg.text.lower().strip()
             if 'has been accepted' in msg:
                 order_created_at = dt.text
-            elif 'has been rejected' in msg and is_receipt_printed:
+            elif 'закрыт чек на возврат' in msg and is_receipt_printed:
                 receipt_printed_at = dt.text
         return models.OrderByUUID(
             number=order_no,
