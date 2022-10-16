@@ -1,6 +1,6 @@
 import uuid
 
-from pydantic import BaseModel, NonNegativeFloat, NonNegativeInt
+from pydantic import BaseModel, NonNegativeFloat, NonNegativeInt, Field
 
 from models import UnitOperationalStatisticsForTodayAndWeekBefore
 from models.private_dodo_api import UnitDeliveryStatistics, SalesChannel
@@ -26,6 +26,9 @@ __all__ = (
     'KitchenProductionStatistics',
     'UnitKitchenProduction',
     'UnitOrdersHandoverTime',
+    'UnitError',
+    'UnitProductivityBalanceStatistics',
+    'ProductivityBalanceStatistics',
 )
 
 
@@ -150,3 +153,36 @@ class UnitOrdersHandoverTime(BaseModel):
     average_cooking_time: int
     average_heated_shelf_time: int
     sales_channels: list[SalesChannel]
+
+
+class UnitProductivityBalanceStatistics(BaseModel):
+    unit_id: int = Field(
+        deprecated=True,
+        description='ID конкретной пиццерии. Рекомендуется использование UUID вместо стандартного ID',
+    )
+    unit_name: str = Field(
+        description='Наименование конкретной пиццерии',
+    )
+    unit_uuid: uuid.UUID = Field(
+        description='UUID конкретной пиццерии. Рекомендуется использование UUID вместо стандартного ID',
+    )
+    kitchen_productivity: NonNegativeInt = Field(
+        description='Производительность кухни',
+    )
+    delivery_productivity: NonNegativeFloat = Field(
+        description="Производительность доставки",
+    )
+    stop_sale_duration_in_seconds: NonNegativeInt = Field(
+        description='Продолжительность стопа продаж с типом "полная остановка" за текующие сутки',
+    )
+
+
+class UnitError(BaseModel):
+    unit_id: int
+    unit_name: str
+    message: str | None = None
+
+
+class ProductivityBalanceStatistics(BaseModel):
+    data: list[UnitProductivityBalanceStatistics]
+    errors: list[UnitError]
