@@ -13,7 +13,7 @@ __all__ = (
     'router',
 )
 
-router = APIRouter(prefix='/v2/statistics', tags=['Reports'])
+router = APIRouter(prefix='/v2/reports', tags=['Reports'])
 
 
 @router.get(
