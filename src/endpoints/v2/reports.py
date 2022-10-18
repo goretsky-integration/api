@@ -1,32 +1,19 @@
 import asyncio
 import collections
-import time
 import uuid
 
-from fastapi import APIRouter, Body, Depends, Request, HTTPException, status, Query
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-
-from services.api.private_dodo_api import get_productivity_statistics, get_delivery_statistics, get_channels_stop_sales
+from fastapi import APIRouter, Depends, Query
 
 import models
+from endpoints.bearer import AccessTokenBearer
+from services.api.private_dodo_api import get_productivity_statistics, get_delivery_statistics, get_channels_stop_sales
 from utils import time_utils
-
 
 __all__ = (
     'router',
 )
 
-router = APIRouter(prefix='/v1/statistics', tags=['Reports'])
-
-
-class AccessTokenBearer(HTTPBearer):
-
-    def __init__(self):
-        super().__init__(scheme_name='Token', description='Access Token к Dodo API')
-
-    async def __call__(self, request: Request) -> str:
-        credentials: HTTPAuthorizationCredentials = await super().__call__(request)
-        return credentials.credentials
+router = APIRouter(prefix='/v2/statistics', tags=['Reports'])
 
 
 @router.get(
