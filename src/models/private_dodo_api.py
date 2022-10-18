@@ -13,6 +13,7 @@ __all__ = (
     'StopSalesBySalesChannels',
     'OrdersHandoverTime',
     'SalesChannel',
+    'UnitProductivityStatistics',
 )
 
 
@@ -30,6 +31,12 @@ class UnitDeliveryStatistics(BaseModel):
     orders_with_courier_app_count: NonNegativeInt = Field(alias='ordersWithCourierAppCount')
     trips_count: NonNegativeInt = Field(alias='tripsCount')
     trips_duration: NonNegativeInt = Field(alias='tripsDuration')
+
+    @property
+    def orders_per_labor_hour(self) -> int | float:
+        if self.couriers_shifts_duration == 0:
+            return 0
+        return round(self.delivery_orders_count / (self.couriers_shifts_duration / 3600), 1)
 
 
 class StopSales(BaseModel):
@@ -72,3 +79,15 @@ class OrdersHandoverTime(BaseModel):
     tracking_pending_time: int = Field(alias='trackingPendingTime')
     cooking_time: int = Field(alias='cookingTime')
     heated_shelf_time: int = Field(alias='heatedShelfTime')
+
+
+class UnitProductivityStatistics(BaseModel):
+    unit_uuid: uuid.UUID = Field(alias='unitId')
+    unit_name: str = Field(alias='unitName')
+    labor_hours: int = Field(alias='laborHours')
+    sales: float = Field(alias='sales')
+    sales_per_labor_hour: float = Field(alias='salesPerLaborHour')
+    products_per_labor_hour: float = Field(alias='productsPerLaborHour')
+    avg_heated_shelf_time: int = Field(alias='avgHeatedShelfTime')
+    orders_per_courier_labour_hour: float = Field(alias='ordersPerCourierLabourHour')
+    kitchen_speed_percentage: float = Field(alias='kitchenSpeedPercentage')

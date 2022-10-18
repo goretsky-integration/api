@@ -1,5 +1,6 @@
 import statistics
 import uuid
+import datetime
 from typing import Iterable
 
 import httpx
@@ -64,6 +65,22 @@ async def get_orders_handover_time(
     return parse_obj_as(list[models.OrdersHandoverTime], response_json['ordersHandoverTime'])
 
 
+async def get_productivity_statistics(
+        token: str,
+        unit_uuids: Iterable[uuid.UUID],
+        datetime_config: time_utils.Period,
+) -> list[models.UnitProductivityStatistics]:
+    url = 'https://api.dodois.io/dodopizza/ru/production/productivity'
+    # округляй до дату часов
+    datetime_format = '%Y-%m-%dT%H:00:00'
+    period = time_utils.Period(
+        from_datetime=datetime.datetime.strptime(datetime_config.from_datetime.strftime(datetime_format), datetime_format),
+        to_datetime=datetime.datetime.strptime(datetime_config.to_datetime.strftime(datetime_format), datetime_format),
+    )
+    response_json = await request_to_private_dodo_api(url, token, unit_uuids, period)
+    return parse_obj_as(list[models.UnitProductivityStatistics], response_json['productivityStatistics'])
+
+
 async def request_to_private_dodo_api(
         url: str,
         token: str,
@@ -84,13 +101,3 @@ async def request_to_private_dodo_api(
     if not response.is_success:
         raise exceptions.PrivateDodoAPIError(status_code=response.status_code)
     return response.json()
-
-
-if __name__ == '__main__':
-    import asyncio
-
-    print(asyncio.run(get_orders_handover_time('103C7E11CA808AF59E5ABDAE445399560D578BCFDF6A818A4DFD59B1267CF2F5',
-                                               [uuid.UUID('000d3a24-0c71-9a87-11e6-8aba13f80da9'),
-                                                uuid.UUID('000d3a24-0c71-9a87-11e6-8aba13f82835'),
-                                                uuid.UUID('000d3a24-0c71-9a87-11e6-8aba13f88754')],
-    time_utils.Period.new_today())))

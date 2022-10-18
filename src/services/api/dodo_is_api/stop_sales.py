@@ -16,6 +16,7 @@ RM = TypeVar('RM')
 
 
 class StopType(Enum):
+    UNIT = 0
     STREET = 3
     SECTOR = 4
 

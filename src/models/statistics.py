@@ -28,7 +28,6 @@ __all__ = (
     'UnitOrdersHandoverTime',
     'UnitError',
     'UnitProductivityBalanceStatistics',
-    'ProductivityBalanceStatistics',
 )
 
 
@@ -156,20 +155,13 @@ class UnitOrdersHandoverTime(BaseModel):
 
 
 class UnitProductivityBalanceStatistics(BaseModel):
-    unit_id: int = Field(
-        deprecated=True,
-        description='ID конкретной пиццерии. Рекомендуется использование UUID вместо стандартного ID',
-    )
-    unit_name: str = Field(
-        description='Наименование конкретной пиццерии',
-    )
     unit_uuid: uuid.UUID = Field(
-        description='UUID конкретной пиццерии. Рекомендуется использование UUID вместо стандартного ID',
+        description='UUID пиццерии',
     )
-    kitchen_productivity: NonNegativeInt = Field(
+    sales_per_labor_hour: NonNegativeInt = Field(
         description='Производительность кухни',
     )
-    delivery_productivity: NonNegativeFloat = Field(
+    orders_per_labor_hour: NonNegativeFloat = Field(
         description="Производительность доставки",
     )
     stop_sale_duration_in_seconds: NonNegativeInt = Field(
@@ -181,8 +173,3 @@ class UnitError(BaseModel):
     unit_id: int
     unit_name: str
     message: str | None = None
-
-
-class ProductivityBalanceStatistics(BaseModel):
-    data: list[UnitProductivityBalanceStatistics]
-    errors: list[UnitError]
