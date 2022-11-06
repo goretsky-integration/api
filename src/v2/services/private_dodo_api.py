@@ -34,7 +34,7 @@ class PrivateDodoAPI:
 
     @contextlib.asynccontextmanager
     async def get_api_client(self) -> httpx.AsyncClient:
-        async with httpx.AsyncClient(base_url=self.base_url, headers=self.headers) as client:
+        async with httpx.AsyncClient(base_url=self.base_url, headers=self.headers, timeout=30) as client:
             yield client
 
     async def get_production_productivity_statistics(
@@ -73,3 +73,38 @@ class PrivateDodoAPI:
             raise exceptions.Unauthorized
         return parse_obj_as(list[models.UnitDeliveryStatistics], response.json()['unitsStatistics'])
 
+    async def get_stop_sales_by_sales_channels(
+            self,
+            period: Period,
+            unit_uuids: Iterable[uuid.UUID],
+    ) -> list[models.StopSaleBySalesChannels]:
+        params = {
+            'units': stringify_uuids(unit_uuids),
+            'from': period.start.strftime('%Y-%m-%dT%H:%M:%S'),
+            'to': period.end.strftime('%Y-%m-%dT%H:%M:%S'),
+        }
+        async with self.get_api_client() as client:
+            response = await client.get('/production/stop-sales-channels', params=params)
+        if response.status_code == 400:
+            raise exceptions.BadRequest('From or to parameter is missing')
+        elif response.status_code == 401:
+            raise exceptions.Unauthorized
+        return parse_obj_as(list[models.StopSaleBySalesChannels], response.json()['stopSalesBySalesChannels'])
+
+    async def get_stop_sales_by_ingredients(
+            self,
+            period: Period,
+            unit_uuids: Iterable[uuid.UUID],
+    ):
+        params = {
+            'units': stringify_uuids(unit_uuids),
+            'from': period.start.strftime('%Y-%m-%dT%H:%M:%S'),
+            'to': period.end.strftime('%Y-%m-%dT%H:%M:%S'),
+        }
+        async with self.get_api_client() as client:
+            response = await client.get('/production/stop-sales-ingredients', params=params)
+        if response.status_code == 400:
+            raise exceptions.BadRequest('From or to parameter is missing')
+        elif response.status_code == 401:
+            raise exceptions.Unauthorized
+        return parse_obj_as(list[models.StopSaleByIngredients], response.json()['stopSalesByIngredients'])

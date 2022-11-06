@@ -21,7 +21,7 @@ class UnitProductivityStatistics(BaseModel):
 
 
 class UnitDeliveryStatistics(BaseModel):
-    unit_id: uuid.UUID = Field(alias='unitId')
+    unit_uuid: uuid.UUID = Field(alias='unitId')
     unit_name: str = Field(alias='unitName')
     average_cooking_time: int = Field(alias='avgCookingTime')
     average_delivery_order_fulfillment_time: int = Field(alias='avgDeliveryOrderFulfillmentTime')
