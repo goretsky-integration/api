@@ -12,65 +12,71 @@ from utils import time_utils, exceptions
 
 
 async def get_delivery_statistics(
+        country_code: str,
         token: str,
         unit_uuids: Iterable[uuid.UUID],
         datetime_config: time_utils.Period
 ) -> list[models.UnitDeliveryStatistics]:
-    url = 'https://api.dodois.io/dodopizza/ru/delivery/statistics/'
+    url = f'https://api.dodois.io/dodopizza/{country_code}/delivery/statistics/'
     response_json = await request_to_private_dodo_api(url, token, unit_uuids, datetime_config)
     return parse_obj_as(list[models.UnitDeliveryStatistics],
                         response_json['unitsStatistics'])
 
 
 async def get_ingredient_stop_sales(
+        country_code: str,
         token: str,
         unit_uuids: Iterable[uuid.UUID],
         datetime_config: time_utils.Period,
 ) -> list[models.StopSalesByIngredients]:
-    url = 'https://api.dodois.io/dodopizza/ru/production/stop-sales-ingredients'
+    url = f'https://api.dodois.io/dodopizza/{country_code}/production/stop-sales-ingredients'
     ingredient_stop_sales = await request_to_private_dodo_api(url, token, unit_uuids, datetime_config)
     return parse_obj_as(list[models.StopSalesByIngredients],
                         ingredient_stop_sales['stopSalesByIngredients'])
 
 
 async def get_channels_stop_sales(
+        country_code: str,
         token: str,
         unit_uuids: Iterable[uuid.UUID],
         datetime_config: time_utils.Period,
 ) -> list[models.StopSalesBySalesChannels]:
-    url = 'https://api.dodois.io/dodopizza/ru/production/stop-sales-channels'
+    url = f'https://api.dodois.io/dodopizza/{country_code}/production/stop-sales-channels'
     channels_stop_sales = await request_to_private_dodo_api(url, token, unit_uuids, datetime_config)
     return parse_obj_as(list[models.StopSalesBySalesChannels],
                         channels_stop_sales['stopSalesBySalesChannels'])
 
 
 async def get_products_stop_sales(
+        country_code: str,
         token: str,
         unit_uuids: Iterable[uuid.UUID],
         datetime_config: time_utils.Period,
 ) -> list[models.StopSalesByProduct]:
-    url = 'https://api.dodois.io/dodopizza/ru/production/stop-sales-products'
+    url = f'https://api.dodois.io/dodopizza/{country_code}/production/stop-sales-products'
     products_stop_sales = await request_to_private_dodo_api(url, token, unit_uuids, datetime_config)
     return parse_obj_as(list[models.StopSalesByProduct],
                         products_stop_sales['stopSalesByProducts'])
 
 
 async def get_orders_handover_time(
+        country_code: str,
         token: str,
         unit_uuids: Iterable[uuid.UUID],
         datetime_config: time_utils.Period,
 ) -> list[models.OrdersHandoverTime]:
-    url = 'https://api.dodois.io/dodopizza/ru/production/orders-handover-time'
+    url = f'https://api.dodois.io/dodopizza/{country_code}/production/orders-handover-time'
     response_json = await request_to_private_dodo_api(url, token, unit_uuids, datetime_config)
     return parse_obj_as(list[models.OrdersHandoverTime], response_json['ordersHandoverTime'])
 
 
 async def get_productivity_statistics(
+        country_code: str,
         token: str,
         unit_uuids: Iterable[uuid.UUID],
         datetime_config: time_utils.Period,
 ) -> list[models.UnitProductivityStatistics]:
-    url = 'https://api.dodois.io/dodopizza/ru/production/productivity'
+    url = f'https://api.dodois.io/dodopizza/{country_code}/production/productivity'
     # округляй до дату часов
     datetime_format = '%Y-%m-%dT%H:00:00'
     period = time_utils.Period(
