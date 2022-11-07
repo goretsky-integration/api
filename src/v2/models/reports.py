@@ -8,6 +8,7 @@ __all__ = (
     'UnitDeliverySpeedStatistics',
     'UnitDeliveryProductivityStatistics',
     'UnitHeatedShelfTimeStatistics',
+    'UnitBeingLateCertificatesTodayAndWeekBefore',
 )
 
 
@@ -51,3 +52,9 @@ class UnitDeliveryProductivityStatistics(BaseModel):
 class UnitHeatedShelfTimeStatistics(BaseModel):
     unit_uuid: uuid.UUID
     average_heated_shelf_time: int = 0
+
+
+class UnitBeingLateCertificatesTodayAndWeekBefore(BaseModel):
+    unit_uuid: uuid.UUID
+    certificates_count_today: int
+    certificates_count_week_before: int

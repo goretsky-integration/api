@@ -32,6 +32,13 @@ class Period:
 
     @classmethod
     def week_before_to_this_time(cls) -> 'Period':
-        week_ago = get_moscow_now() - datetime.timedelta(days=7)
-        start = datetime.datetime(week_ago.year, week_ago.month, week_ago.day)
-        return cls(start=start, end=week_ago)
+        week_before = get_moscow_now() - datetime.timedelta(days=7)
+        start = datetime.datetime(week_before.year, week_before.month, week_before.day)
+        return cls(start=start, end=week_before)
+
+    @classmethod
+    def week_before(cls) -> 'Period':
+        week_before = get_moscow_now() - datetime.timedelta(days=7)
+        start = datetime.datetime(week_before.year, week_before.month, week_before.day)
+        end = datetime.datetime(week_before.year, week_before.month, week_before.day, 23, 59, 59)
+        return cls(start, end)

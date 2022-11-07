@@ -1,4 +1,5 @@
 import asyncio
+import collections
 import datetime
 import statistics
 import uuid
@@ -8,7 +9,8 @@ from fastapi import APIRouter, Depends, Query
 
 from v2 import models
 from v2.endpoints.bearer import AccessTokenBearer
-from v2.models import UnitUUIDsIn, CountryCode, UnitProductivityBalanceStatistics
+from v2.models import UnitUUIDsIn, CountryCode, UnitProductivityBalanceStatistics, \
+    UnitBeingLateCertificatesTodayAndWeekBefore
 from v2.periods import Period
 from v2.services import production_statistics, delivery_statistics
 from v2.services.private_dodo_api import PrivateDodoAPI
@@ -151,7 +153,7 @@ async def get_delivery_productivity_statistics(
         token: str = Depends(AccessTokenBearer()),
 ):
     today_period = Period.today()
-    week_before_period = Period.week_ago()
+    week_before_period = Period.week_before_to_this_time()
     api = PrivateDodoAPI(token, country_code)
     today_units_delivery_statistics, week_before_units_delivery_statistics = await asyncio.gather(
         api.get_delivery_statistics(today_period, unit_uuids),
@@ -164,5 +166,33 @@ async def get_delivery_productivity_statistics(
             unit_uuid=unit_uuid,
             unit_today_delivery_statistics=unit_uuid_to_today_statistics[unit_uuid],
             unit_week_delivery_statistics=unit_uuid_to_week_before_statistics[unit_uuid],
+        ) for unit_uuid in unit_uuids
+    ]
+
+
+@router.get(
+    path='/being-late-certificates',
+    response_model=list[UnitBeingLateCertificatesTodayAndWeekBefore],
+)
+async def get_being_late_certificates_for_today_and_week_before(
+        country_code: CountryCode,
+        unit_uuids: UnitUUIDsIn = Query(),
+        token: str = Depends(AccessTokenBearer()),
+):
+    today_period = Period.today()
+    week_before_period = Period.week_before()
+    api = PrivateDodoAPI(token, country_code)
+    today_units_delivery_statistics, week_before_units_delivery_statistics = await asyncio.gather(
+        api.get_delivery_statistics(today_period, unit_uuids),
+        api.get_delivery_statistics(week_before_period, unit_uuids),
+    )
+    unit_uuid_to_today_count = {unit.unit_uuid: unit.late_orders_count for unit in today_units_delivery_statistics}
+    unit_uuid_to_week_before_count = {unit.unit_uuid: unit.late_orders_count for unit in
+                                      week_before_units_delivery_statistics}
+    return [
+        UnitBeingLateCertificatesTodayAndWeekBefore(
+            unit_uuid=unit_uuid,
+            certificates_count_today=unit_uuid_to_today_count.get(unit_uuid, 0),
+            certificates_count_week_before=unit_uuid_to_week_before_count.get(unit_uuid, 0),
         ) for unit_uuid in unit_uuids
     ]
