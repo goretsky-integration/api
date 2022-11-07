@@ -4,7 +4,13 @@ from typing import Any
 
 from bs4 import BeautifulSoup
 
-from v1.models import StopSaleBySector, StopSaleByStreet, UnitDeliveryPartialStatistics, UnitKitchenPartialStatistics
+from v1.models import (
+    StopSaleBySector,
+    StopSaleByStreet,
+    UnitDeliveryPartialStatistics,
+    UnitKitchenPartialStatistics,
+    StockBalance,
+)
 
 __all__ = (
     'PartialStatisticsParser',
@@ -13,6 +19,7 @@ __all__ = (
     'StreetStopSalesHTMLParser',
     'DeliveryStatisticsHTMLParser',
     'KitchenStatisticsHTMLParser',
+    'StockBalanceHTMLParser',
 )
 
 
@@ -110,3 +117,31 @@ class KitchenStatisticsHTMLParser(PartialStatisticsParser):
             from_week_before_percent=from_week_before_percent,
             total_cooking_time=total_cooking_time,
         )
+
+
+class StockBalanceHTMLParser(HTMLParser):
+
+    def __init__(self, html: str, unit_id: int):
+        super().__init__(html)
+        self.unit_id = unit_id
+
+    def parse(self) -> list[StockBalance]:
+        trs = self._soup.find('tbody').find_all('tr')
+        result: list[StockBalance] = []
+        for tr in trs:
+            tds = tr.find_all('td')
+            if len(tds) != 6:
+                continue
+            ingredient_name, stocks_count, _, _, _, days_left = [td.text.strip() for td in tds]
+            if not days_left.isdigit():
+                continue
+            *ingredient_name_parts, stocks_unit = ingredient_name.split(',')
+            ingredient_name = ','.join(ingredient_name_parts)
+            result.append(StockBalance(
+                unit_id=self.unit_id,
+                ingredient_name=ingredient_name,
+                days_left=days_left,
+                stocks_unit=stocks_unit.strip(),
+                stocks_count=stocks_count.strip().replace(',', '.').replace(' ', ''),
+            ))
+        return result
