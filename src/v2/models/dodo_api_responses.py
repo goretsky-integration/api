@@ -1,3 +1,5 @@
+import datetime
+import enum
 import uuid
 
 from pydantic import BaseModel, Field
@@ -5,7 +7,15 @@ from pydantic import BaseModel, Field
 __all__ = (
     'UnitProductivityStatistics',
     'UnitDeliveryStatistics',
+    'OrdersHandoverTime',
+    'SalesChannel',
 )
+
+
+class SalesChannel(enum.Enum):
+    DINE_IN = 'Dine-in'
+    TAKEAWAY = 'Takeaway'
+    DELIVERY = 'Delivery'
 
 
 class UnitProductivityStatistics(BaseModel):
@@ -40,3 +50,15 @@ class UnitDeliveryStatistics(BaseModel):
         if self.couriers_shifts_duration == 0:
             return 0
         return round(self.delivery_orders_count / (self.couriers_shifts_duration / 3600), 1)
+
+
+class OrdersHandoverTime(BaseModel):
+    unit_id: uuid.UUID = Field(alias='unitId')
+    unit_name: str = Field(alias='unitName')
+    order_id: uuid.UUID = Field(alias='orderId')
+    order_number: str = Field(alias='orderNumber')
+    sales_channel: SalesChannel = Field(alias='salesChannel')
+    orders_tracking_start_at: datetime.datetime = Field(alias='orderTrackingStartAt')
+    tracking_pending_time: int = Field(alias='trackingPendingTime')
+    cooking_time: int = Field(alias='cookingTime')
+    heated_shelf_time: int = Field(alias='heatedShelfTime')

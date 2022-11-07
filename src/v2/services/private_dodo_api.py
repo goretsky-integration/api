@@ -108,3 +108,21 @@ class PrivateDodoAPI:
         elif response.status_code == 401:
             raise exceptions.Unauthorized
         return parse_obj_as(list[models.StopSaleByIngredients], response.json()['stopSalesByIngredients'])
+
+    async def get_orders_handover_time_statistics(
+            self,
+            period: Period,
+            unit_uuids: Iterable[uuid.UUID],
+    ) -> list[models.OrdersHandoverTime]:
+        params = {
+            'units': stringify_uuids(unit_uuids),
+            'from': period.start.strftime('%Y-%m-%dT%H:%M:%S'),
+            'to': period.end.strftime('%Y-%m-%dT%H:%M:%S'),
+        }
+        async with self.get_api_client() as client:
+            response = await client.get('/production/orders-handover-time', params=params)
+        if response.status_code == 400:
+            raise exceptions.BadRequest('From or to parameter is missing')
+        elif response.status_code == 401:
+            raise exceptions.Unauthorized
+        return parse_obj_as(list[models.OrdersHandoverTime], response.json()['ordersHandoverTime'])

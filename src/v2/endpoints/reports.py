@@ -6,10 +6,11 @@ from typing import Iterable
 from fastapi import APIRouter, Depends, Query
 
 from v2 import models
-from v2.periods import Period
-from v2.services.private_dodo_api import PrivateDodoAPI
 from v2.endpoints.bearer import AccessTokenBearer
 from v2.models import UnitUUIDsIn, CountryCode, UnitProductivityBalanceStatistics
+from v2.periods import Period
+from v2.services import production_statistics
+from v2.services.private_dodo_api import PrivateDodoAPI
 
 router = APIRouter(prefix='/v2/{country_code}/reports', tags=['Reports'])
 
@@ -31,8 +32,6 @@ def zip_by_unit_uuid(
             'stop_sales': unit_uuid_to_stop_sales[unit_uuid],
         })
     return result
-
-
 
 
 @router.get(
@@ -68,13 +67,19 @@ async def get_total_cooking_time_statistics(
 
 @router.get(
     path='/restaurant-cooking-time',
+    response_model=list[models.UnitRestaurantCookingTimeStatistics],
 )
 async def get_restaurant_cooking_time_statistics(
         country_code: CountryCode,
         unit_uuids: UnitUUIDsIn = Query(),
         token: str = Depends(AccessTokenBearer()),
 ):
-    pass
+    period = Period.today()
+    api = PrivateDodoAPI(token, country_code)
+    orders = await api.get_orders_handover_time_statistics(period, unit_uuids)
+    unit_uuid_to_orders = production_statistics.group_by_unit_uuids(orders)
+    return [production_statistics.orders_to_restaurant_cooking_time_dto(unit_uuid, unit_uuid_to_orders[unit_uuid])
+            for unit_uuid in unit_uuids]
 
 
 @router.get(
