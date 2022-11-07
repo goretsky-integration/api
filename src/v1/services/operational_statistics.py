@@ -53,3 +53,15 @@ async def get_delivery_partial_statistics(
     if response.is_error:
         raise exceptions.UnitIDAPIError(unit_id=unit_id)
     return parsers.DeliveryStatisticsHTMLParser(response.text, unit_id).parse()
+
+
+async def get_kitchen_partial_statistics(
+        client: httpx.AsyncClient,
+        unit_id: int,
+) -> models.UnitKitchenPartialStatistics:
+    url = 'https://officemanager.dodopizza.ru/OfficeManager/OperationalStatistics/KitchenPartial'
+    params = {'unitId': unit_id}
+    response = await client.get(url, params=params)
+    if response.is_error:
+        raise exceptions.UnitIDAPIError(unit_id=unit_id)
+    return parsers.KitchenStatisticsHTMLParser(response.text, unit_id).parse()

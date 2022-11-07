@@ -4,7 +4,7 @@ from typing import Any
 
 from bs4 import BeautifulSoup
 
-from v1.models import StopSaleBySector, StopSaleByStreet, UnitDeliveryPartialStatistics
+from v1.models import StopSaleBySector, StopSaleByStreet, UnitDeliveryPartialStatistics, UnitKitchenPartialStatistics
 
 __all__ = (
     'PartialStatisticsParser',
@@ -12,6 +12,7 @@ __all__ = (
     'SectorStopSalesHTMLParser',
     'StreetStopSalesHTMLParser',
     'DeliveryStatisticsHTMLParser',
+    'KitchenStatisticsHTMLParser',
 )
 
 
@@ -89,4 +90,23 @@ class DeliveryStatisticsHTMLParser(PartialStatisticsParser):
             heated_shelf_orders_count=self._panel_titles[2],
             couriers_in_queue_count=couriers_in_queue_count,
             couriers_on_shift_count=couriers_on_shift_count,
+        )
+
+
+class KitchenStatisticsHTMLParser(PartialStatisticsParser):
+    __slots__ = ('_soup',)
+
+    def parse_panel_titles(self) -> list[str]:
+        return [self.clear_extra_symbols(i.text)
+                for i in self._soup.find_all('h1', class_='operationalStatistics_panelTitle')]
+
+    def parse(self) -> UnitKitchenPartialStatistics:
+        sales_per_labor_hour_today, from_week_before_percent = self._panel_titles[0].split('\n')
+        minutes, seconds = map(int, self._panel_titles[3].split(':'))
+        total_cooking_time = minutes * 60 + seconds
+        return UnitKitchenPartialStatistics(
+            unit_id=self._unit_id,
+            sales_per_labor_hour_today=sales_per_labor_hour_today,
+            from_week_before_percent=from_week_before_percent,
+            total_cooking_time=total_cooking_time,
         )
