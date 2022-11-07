@@ -1,4 +1,5 @@
 import unicodedata
+import uuid
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -10,6 +11,8 @@ from v1.models import (
     UnitDeliveryPartialStatistics,
     UnitKitchenPartialStatistics,
     StockBalance,
+    OrderByUUID,
+    OrderPartial,
 )
 
 __all__ = (
@@ -20,6 +23,8 @@ __all__ = (
     'DeliveryStatisticsHTMLParser',
     'KitchenStatisticsHTMLParser',
     'StockBalanceHTMLParser',
+    'OrderByUUIDParser',
+    'OrdersPartial',
 )
 
 
@@ -145,3 +150,57 @@ class StockBalanceHTMLParser(HTMLParser):
                 stocks_count=stocks_count.strip().replace(',', '.').replace(' ', ''),
             ))
         return result
+
+
+class OrdersPartial(HTMLParser):
+
+    def parse(self) -> list[OrderPartial]:
+        trs = self._soup.find_all('tr')[1:]
+        nested_trs = [tr.find_all('td') for tr in trs]
+        return [
+            OrderPartial(
+                uuid=td[0].find('a').get('href').split('=')[-1],
+                number=td[1].text.strip(),
+                price=td[4].text.strip('₽').strip(),
+                type=td[7].text
+            ) for td in nested_trs
+        ]
+
+
+class OrderByUUIDParser(HTMLParser):
+
+    def __init__(self, html: str, order_uuid: uuid.UUID, order_price: int, order_type: str):
+        super().__init__(html)
+        self._order_uuid = order_uuid
+        self._order_price = order_price
+        self._order_type = order_type
+
+    def parse(self) -> OrderByUUID:
+        order_no = self._soup.find('span', id='orderNumber').text
+        department = self._soup.find('div', class_='headerDepartment').text
+        history = self._soup.find('div', id='history')
+        trs = history.find_all('tr')[1:]
+        order_created_at = receipt_printed_at = None
+        is_receipt_printed = False
+        for tr in trs:
+            _, msg, _ = tr.find_all('td')
+            msg = msg.text.lower().strip()
+            if 'закрыт чек на возврат' in msg:
+                is_receipt_printed = True
+                break
+        for tr in trs:
+            dt, msg, _ = tr.find_all('td')
+            msg = msg.text.lower().strip()
+            if 'has been accepted' in msg:
+                order_created_at = dt.text
+            elif 'закрыт чек на возврат' in msg and is_receipt_printed:
+                receipt_printed_at = dt.text
+        return OrderByUUID(
+            number=order_no,
+            unit_name=department,
+            created_at=order_created_at,
+            receipt_printed_at=receipt_printed_at,
+            uuid=self._order_uuid,
+            price=self._order_price,
+            type=self._order_type,
+        )
