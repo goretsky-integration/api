@@ -1,25 +1,21 @@
-from fastapi import FastAPI
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, status, Response
 
-import endpoints
-from utils import exceptions
+import v1.endpoints
+import v2.endpoints
 
 __all__ = (
     'app',
 )
 
 app = FastAPI()
-app.include_router(endpoints.v2.statistics.router)
-app.include_router(endpoints.v1.statistics.router)
-app.include_router(endpoints.v2.reports.router)
-app.include_router(endpoints.v1.canceled_orders.router)
-app.include_router(endpoints.v1.cheated_orders.router)
-app.include_router(endpoints.v2.stop_sales.router)
-app.include_router(endpoints.v1.stop_sales.router)
-app.include_router(endpoints.v1.stocks.router)
-app.include_router(endpoints.ping.router)
+app.include_router(v1.endpoints.reports.router)
+app.include_router(v2.endpoints.reports.router)
+app.include_router(v1.endpoints.stop_sales.router)
+app.include_router(v2.endpoints.stop_sales.router)
+app.include_router(v1.endpoints.stocks.router)
+app.include_router(v1.endpoints.orders.router)
 
 
-@app.exception_handler(exceptions.PrivateDodoAPIError)
-async def on_private_dodo_api_error(request, exc: exceptions.PrivateDodoAPIError):
-    return JSONResponse({'error': 'error'}, status_code=exc.status_code)
+@app.get('/ping')
+async def ping():
+    return Response(status_code=status.HTTP_200_OK)
