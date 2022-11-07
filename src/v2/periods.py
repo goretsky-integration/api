@@ -4,11 +4,19 @@ from dataclasses import dataclass
 __all__ = (
     'get_moscow_now',
     'Period',
+    'round_to_hours',
 )
 
 
 def get_moscow_now() -> datetime.datetime:
     return datetime.datetime.utcnow() + datetime.timedelta(hours=3)
+
+
+def round_to_hours(dt: datetime.datetime) -> datetime.datetime:
+    hours = dt.hour
+    if dt.second >= 30:
+        hours += 1
+    return datetime.datetime(dt.year, dt.month, dt.day, hours)
 
 
 @dataclass(frozen=True, slots=True)

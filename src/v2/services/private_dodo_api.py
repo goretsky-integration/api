@@ -8,7 +8,7 @@ from pydantic import parse_obj_as
 from core import config
 from v2 import models
 from v2 import exceptions
-from v2.periods import Period
+from v2.periods import Period, round_to_hours
 
 
 def stringify_uuids(uuids: Iterable[uuid.UUID]) -> str:
@@ -45,7 +45,7 @@ class PrivateDodoAPI:
         params = {
             'units': stringify_uuids(unit_uuids),
             'from': period.start.strftime('%Y-%m-%dT%H:00:00'),
-            'to': period.end.strftime('%Y-%m-%dT%H:00:00'),
+            'to': round_to_hours(period.end).strftime('%Y-%m-%dT%H:00:00'),
         }
         async with self.get_api_client() as client:
             response = await client.get('/production/productivity', params=params)
