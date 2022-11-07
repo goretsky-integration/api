@@ -5,7 +5,6 @@ __all__ = (
     'RevenueStatisticsReport',
     'UnitRevenue',
     'TotalRevenue',
-    'UnitBeingLateCertificatesTodayAndWeekBefore',
 )
 
 
@@ -27,10 +26,3 @@ class UnitsRevenueStatistics(BaseModel):
 class RevenueStatisticsReport(BaseModel):
     results: UnitsRevenueStatistics
     errors: list[int]
-
-
-class UnitBeingLateCertificatesTodayAndWeekBefore(BaseModel):
-    unit_id: int
-    unit_name: str
-    certificates_count_today: int
-    certificates_count_week_before: int

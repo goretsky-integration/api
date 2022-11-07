@@ -1,11 +1,9 @@
 import unicodedata
 from abc import ABC, abstractmethod
-from typing import Any, Iterable, Hashable
+from typing import Any
 
-import pandas as pd
 from bs4 import BeautifulSoup
 
-from v1 import models
 from v1.models import StopSaleBySector, StopSaleByStreet
 
 __all__ = (
@@ -74,33 +72,4 @@ class StreetStopSalesHTMLParser(HTMLParser):
                 sector=tds[1],
                 street=tds[2],
             ) for tds in nested_trs
-        ]
-
-
-class BeingLateCertificatesParser(HTMLParser):
-
-    def __init__(self, html: str, request_unit_id: int, units: Iterable[models.UnitIdAndNameIn]):
-        super().__init__(html)
-        self._request_unit_id = request_unit_id
-        self._unit_id_to_unit: dict[int, models.UnitIdAndNameIn] = {unit.id: unit for unit in units}
-        self._unit_name_to_unit: dict[str | Hashable, models.UnitIdAndNameIn] = {unit.name: unit for unit in units}
-
-    def parse(self) -> list[models.UnitBeingLateCertificates]:
-        if 'данные не найдены' in self._soup.text.strip().lower():
-            return []
-        df = pd.read_html(self._html)[1]
-        if len(df.columns) == 7:
-            return [
-                models.UnitBeingLateCertificates(
-                    unit_id=self._request_unit_id,
-                    unit_name=self._unit_id_to_unit[self._request_unit_id].name,
-                    certificates_count=len(df.index),
-                )
-            ]
-        return [
-            models.UnitBeingLateCertificates(
-                unit_id=self._unit_name_to_unit[unit_name].id,
-                unit_name=unit_name,
-                certificates_count=len(group.index)
-            ) for unit_name, group in df.groupby('Пиццерия')
         ]

@@ -14,7 +14,7 @@ def get_moscow_now() -> datetime.datetime:
 
 def round_to_hours(dt: datetime.datetime) -> datetime.datetime:
     hours = dt.hour
-    if dt.second >= 30:
+    if hours != 23:
         hours += 1
     return datetime.datetime(dt.year, dt.month, dt.day, hours)
 
@@ -31,7 +31,7 @@ class Period:
         return cls(start=start, end=now)
 
     @classmethod
-    def week_ago(cls) -> 'Period':
+    def week_before_to_this_time(cls) -> 'Period':
         week_ago = get_moscow_now() - datetime.timedelta(days=7)
         start = datetime.datetime(week_ago.year, week_ago.month, week_ago.day)
         return cls(start=start, end=week_ago)
