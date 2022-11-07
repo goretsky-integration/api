@@ -30,6 +30,7 @@ def zip_by_unit_uuid(
     result = []
     for unit_uuid in unit_uuids:
         result.append({
+            'unit_uuid': unit_uuid,
             'productivity_statistics': unit_uuid_to_productivity_statistics[unit_uuid],
             'delivery_statistics': unit_uuid_to_delivery_statistics[unit_uuid],
             'stop_sales': unit_uuid_to_stop_sales[unit_uuid],
@@ -48,13 +49,43 @@ async def get_productivity_balance_statistics(
 ):
     period = Period(start=datetime.datetime(2022, 10, 25), end=Period.today().end)
     api = PrivateDodoAPI(token, country_code)
-    productivity_statistics, delivery_statistics, stop_sales = await asyncio.gather(
+    productivity_statistics, units_delivery_statistics, stop_sales = await asyncio.gather(
         api.get_production_productivity_statistics(period, unit_uuids),
         api.get_delivery_statistics(period, unit_uuids),
         api.get_stop_sales_by_sales_channels(period, unit_uuids),
     )
-    zipped = zip_by_unit_uuid(unit_uuids, productivity_statistics, delivery_statistics, stop_sales)
-    print(zipped)
+    unit_uuid_to_productivity_statistics = {unit.unit_uuid: unit for unit in productivity_statistics}
+    unit_uuid_to_delivery_statistics = {unit.unit_uuid: unit for unit in units_delivery_statistics}
+    unit_uuid_to_unit_stop_sales = collections.defaultdict(list)
+    for stop_sale in stop_sales:
+        unit_uuid_to_unit_stop_sales[stop_sale.unit_uuid].append(stop_sale)
+
+    response = []
+    for unit_uuid in unit_uuids:
+        sales_per_labor_hour = 0
+        orders_per_labor_hour = 0
+        stop_sale_duration_in_seconds = 0
+        if unit_uuid in unit_uuid_to_productivity_statistics:
+            sales_per_labor_hour = unit_uuid_to_productivity_statistics[unit_uuid].sales_per_labor_hour
+        if unit_uuid in unit_uuid_to_delivery_statistics:
+            orders_per_labor_hour = unit_uuid_to_delivery_statistics[unit_uuid].orders_per_labor_hour
+        if unit_uuid in unit_uuid_to_unit_stop_sales:
+            stop_sales = unit_uuid_to_unit_stop_sales[unit_uuid]
+            for stop_sale in stop_sales:
+                if stop_sale.sales_channel_name != 'Delivery':
+                    continue
+                ended_at = stop_sale.ended_at
+                if stop_sale.ended_at is None:
+                    ended_at = period.end
+                stop_duration = ended_at - stop_sale.started_at
+                stop_sale_duration_in_seconds += stop_duration.total_seconds()
+        response.append(models.UnitProductivityBalanceStatistics(
+            unit_uuid=unit_uuid,
+            sales_per_labor_hour=sales_per_labor_hour,
+            orders_per_labor_hour=orders_per_labor_hour,
+            stop_sale_duration_in_seconds=stop_sale_duration_in_seconds,
+        ))
+    return response
 
 
 @router.get(
@@ -91,17 +122,6 @@ async def get_restaurant_cooking_time_statistics(
     unit_uuid_to_orders = production_statistics.group_by_unit_uuids(orders)
     return [production_statistics.orders_to_restaurant_cooking_time_dto(unit_uuid, unit_uuid_to_orders[unit_uuid])
             for unit_uuid in unit_uuids]
-
-
-@router.get(
-    path='/kitchen-productivity',
-)
-async def get_kitchen_productivity_statistics(
-        country_code: CountryCode,
-        unit_uuids: UnitUUIDsIn = Query(),
-        token: str = Depends(AccessTokenBearer()),
-):
-    pass
 
 
 @router.get(
