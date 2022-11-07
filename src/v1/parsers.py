@@ -4,13 +4,14 @@ from typing import Any
 
 from bs4 import BeautifulSoup
 
-from v1.models import StopSaleBySector, StopSaleByStreet
+from v1.models import StopSaleBySector, StopSaleByStreet, UnitDeliveryPartialStatistics
 
 __all__ = (
     'PartialStatisticsParser',
     'HTMLParser',
     'SectorStopSalesHTMLParser',
     'StreetStopSalesHTMLParser',
+    'DeliveryStatisticsHTMLParser',
 )
 
 
@@ -73,3 +74,19 @@ class StreetStopSalesHTMLParser(HTMLParser):
                 street=tds[2],
             ) for tds in nested_trs
         ]
+
+
+class DeliveryStatisticsHTMLParser(PartialStatisticsParser):
+
+    def parse_panel_titles(self) -> list[str]:
+        return [self.clear_extra_symbols(i.text)
+                for i in self._soup.find_all('h1', class_='operationalStatistics_panelTitle')]
+
+    def parse(self) -> UnitDeliveryPartialStatistics:
+        couriers_on_shift_count, couriers_in_queue_count = self._panel_titles[3].split('/')
+        return UnitDeliveryPartialStatistics(
+            unit_id=self._unit_id,
+            heated_shelf_orders_count=self._panel_titles[2],
+            couriers_in_queue_count=couriers_in_queue_count,
+            couriers_on_shift_count=couriers_on_shift_count,
+        )

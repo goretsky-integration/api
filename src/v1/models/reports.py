@@ -5,6 +5,8 @@ __all__ = (
     'RevenueStatisticsReport',
     'UnitRevenue',
     'TotalRevenue',
+    'UnitDeliveryPartialStatistics',
+    'DeliveryPartialStatisticsReport',
 )
 
 
@@ -25,4 +27,16 @@ class UnitsRevenueStatistics(BaseModel):
 
 class RevenueStatisticsReport(BaseModel):
     results: UnitsRevenueStatistics
+    errors: list[int]
+
+
+class UnitDeliveryPartialStatistics(BaseModel):
+    unit_id: int
+    heated_shelf_orders_count: int
+    couriers_in_queue_count: int
+    couriers_on_shift_count: int
+
+
+class DeliveryPartialStatisticsReport(BaseModel):
+    results: list[UnitDeliveryPartialStatistics]
     errors: list[int]

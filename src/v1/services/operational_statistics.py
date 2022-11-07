@@ -1,6 +1,8 @@
 from typing import Iterable
 
-from v1 import models
+import httpx
+
+from v1 import models, parsers, exceptions
 
 __all__ = (
     'calculate_total_revenue',
@@ -39,3 +41,15 @@ def calculate_total_revenue(
         today=total_revenue_today,
         from_week_before_in_percents=from_week_before_in_percents,
     )
+
+
+async def get_delivery_partial_statistics(
+        client: httpx.AsyncClient,
+        unit_id: int,
+) -> models.UnitDeliveryPartialStatistics:
+    url = 'https://officemanager.dodopizza.ru/OfficeManager/OperationalStatistics/DeliveryWorkPartial'
+    params = {'unitId': unit_id}
+    response = await client.get(url, params=params)
+    if response.is_error:
+        raise exceptions.UnitIDAPIError(unit_id=unit_id)
+    return parsers.DeliveryStatisticsHTMLParser(response.text, unit_id).parse()

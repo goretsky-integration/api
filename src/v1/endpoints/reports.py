@@ -1,7 +1,12 @@
-from fastapi import APIRouter, Query
+import asyncio
 
-from v1.models import RevenueStatisticsReport, CountryCode, UnitsRevenueStatistics, UnitIDsIn
-from v1.services import public_dodo_api
+import httpx
+from fastapi import APIRouter, Query, Body
+
+from v1 import exceptions
+from v1.models import RevenueStatisticsReport, CountryCode, UnitsRevenueStatistics, UnitIDsIn, \
+    DeliveryPartialStatisticsReport, UnitDeliveryPartialStatistics
+from v1.services import public_dodo_api, operational_statistics
 from v1.services.operational_statistics import calculate_units_revenue, calculate_total_revenue
 
 router = APIRouter(tags=['Reports'])
@@ -19,3 +24,16 @@ async def get_revenue_statistics(
     units = calculate_units_revenue(response.results)
     total = calculate_total_revenue(response.results)
     return RevenueStatisticsReport(results=UnitsRevenueStatistics(units=units, total=total), errors=response.errors)
+
+
+@router.post(
+    path='/v1/reports/awaiting-orders',
+    response_model=DeliveryPartialStatisticsReport,
+)
+async def get_delivery_partial_statistics(unit_ids: UnitIDsIn, cookies: dict = Body()):
+    async with httpx.AsyncClient(cookies=cookies) as client:
+        tasks = (operational_statistics.get_delivery_partial_statistics(client, unit_id) for unit_id in unit_ids)
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+    delivery_partial_statistics = [result for result in results if isinstance(result, UnitDeliveryPartialStatistics)]
+    errors = [result.unit_id for result in results if isinstance(result, exceptions.UnitIDAPIError)]
+    return DeliveryPartialStatisticsReport(results=delivery_partial_statistics, errors=errors)
