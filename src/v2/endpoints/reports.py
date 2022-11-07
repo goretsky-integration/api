@@ -104,13 +104,22 @@ async def get_kitchen_productivity_statistics(
 
 @router.get(
     path='/heated-shelf-time',
+    response_model=list[models.UnitHeatedShelfTimeStatistics],
 )
 async def get_heated_shelf_time_statistics(
         country_code: CountryCode,
         unit_uuids: UnitUUIDsIn = Query(),
         token: str = Depends(AccessTokenBearer()),
 ):
-    pass
+    period = Period.today()
+    api = PrivateDodoAPI(token, country_code)
+    production_productivity_statistics = await api.get_production_productivity_statistics(period, unit_uuids)
+    return [
+        models.UnitHeatedShelfTimeStatistics(
+            unit_uuid=unit.unit_uuid,
+            average_heated_shelf_time=unit.avg_heated_shelf_time,
+        ) for unit in production_productivity_statistics
+    ]
 
 
 @router.get(

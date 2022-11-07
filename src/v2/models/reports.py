@@ -6,6 +6,8 @@ __all__ = (
     'UnitProductivityBalanceStatistics',
     'UnitRestaurantCookingTimeStatistics',
     'UnitDeliverySpeedStatistics',
+    'UnitDeliveryProductivityStatistics',
+    'UnitHeatedShelfTimeStatistics',
 )
 
 
@@ -37,3 +39,15 @@ class UnitDeliverySpeedStatistics(BaseModel):
     average_delivery_order_fulfillment_time: int = 0
     average_heated_shelf_time: int = 0
     average_order_trip_time: int = 0
+
+
+class UnitDeliveryProductivityStatistics(BaseModel):
+    unit_uuid: uuid.UUID
+    orders_for_courier_count_per_hour_today: float
+    orders_for_courier_count_per_hour_week_before: float
+    delta_from_week_before: int
+
+
+class UnitHeatedShelfTimeStatistics(BaseModel):
+    unit_uuid: uuid.UUID
+    average_heated_shelf_time: int = 0
