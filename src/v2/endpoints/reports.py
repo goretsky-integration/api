@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import statistics
 import uuid
 from typing import Iterable
 
@@ -9,7 +10,7 @@ from v2 import models
 from v2.endpoints.bearer import AccessTokenBearer
 from v2.models import UnitUUIDsIn, CountryCode, UnitProductivityBalanceStatistics
 from v2.periods import Period
-from v2.services import production_statistics
+from v2.services import production_statistics, delivery_statistics
 from v2.services.private_dodo_api import PrivateDodoAPI
 
 router = APIRouter(prefix='/v2/{country_code}/reports', tags=['Reports'])
@@ -62,7 +63,15 @@ async def get_total_cooking_time_statistics(
         unit_uuids: UnitUUIDsIn = Query(),
         token: str = Depends(AccessTokenBearer()),
 ):
-    pass
+    period = Period.today()
+    api = PrivateDodoAPI(token, country_code)
+    orders = await api.get_orders_handover_time_statistics(period, unit_uuids)
+    print(orders)
+    a = statistics.mean([order.tracking_pending_time for order in orders])
+    b = statistics.mean([order.cooking_time for order in orders])
+    c = statistics.mean(
+        [order.heated_shelf_time for order in orders if order.sales_channel.name == models.SalesChannel.DINE_IN.name])
+    print(a + b + c)
 
 
 @router.get(
@@ -106,13 +115,22 @@ async def get_heated_shelf_time_statistics(
 
 @router.get(
     path='/delivery-speed',
+    response_model=list[models.UnitDeliverySpeedStatistics],
 )
 async def get_delivery_speed_statistics(
         country_code: CountryCode,
         unit_uuids: UnitUUIDsIn = Query(),
         token: str = Depends(AccessTokenBearer()),
 ):
-    pass
+    period = Period.today()
+    api = PrivateDodoAPI(token, country_code)
+    units_delivery_statistics = await api.get_delivery_statistics(period, unit_uuids)
+    unit_uuids_from_api = {unit.unit_uuid for unit in units_delivery_statistics}
+    unit_uuids_not_from_api = unit_uuids - unit_uuids_from_api
+    empty_delivery_statistics = [models.UnitDeliverySpeedStatistics(unit_uuid=unit_uuid) for unit_uuid in
+                                 unit_uuids_not_from_api]
+    return [delivery_statistics.delivery_statistics_to_delivery_speed(unit_delivery_statistics)
+            for unit_delivery_statistics in units_delivery_statistics] + empty_delivery_statistics
 
 
 @router.get(

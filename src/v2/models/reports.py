@@ -5,6 +5,7 @@ from pydantic import BaseModel, Field, NonNegativeInt, NonNegativeFloat
 __all__ = (
     'UnitProductivityBalanceStatistics',
     'UnitRestaurantCookingTimeStatistics',
+    'UnitDeliverySpeedStatistics',
 )
 
 
@@ -28,3 +29,11 @@ class UnitRestaurantCookingTimeStatistics(BaseModel):
         description='UUID пиццерии',
     )
     average_tracking_pending_and_cooking_time: int
+
+
+class UnitDeliverySpeedStatistics(BaseModel):
+    unit_uuid: uuid.UUID
+    average_cooking_time: int = 0
+    average_delivery_order_fulfillment_time: int = 0
+    average_heated_shelf_time: int = 0
+    average_order_trip_time: int = 0
