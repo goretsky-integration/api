@@ -70,7 +70,7 @@ async def get_total_cooking_time_statistics(
     a = statistics.mean([order.tracking_pending_time for order in orders])
     b = statistics.mean([order.cooking_time for order in orders])
     c = statistics.mean(
-        [order.heated_shelf_time for order in orders if order.sales_channel.name == models.SalesChannel.DINE_IN.name])
+        [order.heated_shelf_time for order in orders if order.sales_channel.name != models.SalesChannel.DELIVERY.name])
     print(a + b + c)
 
 
@@ -150,15 +150,19 @@ async def get_delivery_productivity_statistics(
         unit_uuids: UnitUUIDsIn = Query(),
         token: str = Depends(AccessTokenBearer()),
 ):
-    pass
-
-
-@router.get(
-    path='/being-late-certificates',
-)
-async def get_being_late_certificates_statistics(
-        country_code: CountryCode,
-        unit_uuids: UnitUUIDsIn = Query(),
-        token: str = Depends(AccessTokenBearer()),
-):
-    pass
+    today_period = Period.today()
+    week_before_period = Period.week_ago()
+    api = PrivateDodoAPI(token, country_code)
+    today_units_delivery_statistics, week_before_units_delivery_statistics = await asyncio.gather(
+        api.get_delivery_statistics(today_period, unit_uuids),
+        api.get_delivery_statistics(week_before_period, unit_uuids),
+    )
+    unit_uuid_to_today_statistics = {unit.unit_uuid: unit for unit in today_units_delivery_statistics}
+    unit_uuid_to_week_before_statistics = {unit.unit_uuid: unit for unit in week_before_units_delivery_statistics}
+    return [
+        delivery_statistics.to_today_and_week_before_delivery_productivity(
+            unit_uuid=unit_uuid,
+            unit_today_delivery_statistics=unit_uuid_to_today_statistics[unit_uuid],
+            unit_week_delivery_statistics=unit_uuid_to_week_before_statistics[unit_uuid],
+        ) for unit_uuid in unit_uuids
+    ]
