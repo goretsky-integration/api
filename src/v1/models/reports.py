@@ -13,6 +13,7 @@ __all__ = (
 
 
 class UnitRevenue(BaseModel):
+    unit_id: int
     today: int
     from_week_before_in_percents: int
 
