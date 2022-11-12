@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, Query
 from v2 import models
 from v2.endpoints.bearer import AccessTokenBearer
 from v2.models import UnitUUIDsIn, CountryCode, UnitProductivityBalanceStatistics, \
-    UnitBeingLateCertificatesTodayAndWeekBefore
+    UnitBeingLateCertificatesTodayAndWeekBefore, UnitDeliveryProductivityStatistics
 from v2.periods import Period
 from v2.services import production_statistics, delivery_statistics
 from v2.services.private_dodo_api import PrivateDodoAPI
@@ -89,25 +89,6 @@ async def get_productivity_balance_statistics(
 
 
 @router.get(
-    path='/total-cooking-time',
-)
-async def get_total_cooking_time_statistics(
-        country_code: CountryCode,
-        unit_uuids: UnitUUIDsIn = Query(),
-        token: str = Depends(AccessTokenBearer()),
-):
-    period = Period.today()
-    api = PrivateDodoAPI(token, country_code)
-    orders = await api.get_orders_handover_time_statistics(period, unit_uuids)
-    print(orders)
-    a = statistics.mean([order.tracking_pending_time for order in orders])
-    b = statistics.mean([order.cooking_time for order in orders])
-    c = statistics.mean(
-        [order.heated_shelf_time for order in orders if order.sales_channel.name != models.SalesChannel.DELIVERY.name])
-    print(a + b + c)
-
-
-@router.get(
     path='/restaurant-cooking-time',
     response_model=list[models.UnitRestaurantCookingTimeStatistics],
 )
@@ -166,6 +147,7 @@ async def get_delivery_speed_statistics(
 
 @router.get(
     path='/delivery-productivity',
+    response_model=list[UnitDeliveryProductivityStatistics],
 )
 async def get_delivery_productivity_statistics(
         country_code: CountryCode,
