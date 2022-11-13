@@ -22,6 +22,7 @@ def calculate_units_revenue(
 ) -> list[models.UnitRevenue]:
     return [
         models.UnitRevenue(
+            unit_id=unit.unit_id,
             today=unit.today.revenue,
             from_week_before_in_percents=calculate_percent_from_week_before(
                 now=unit.today.revenue,

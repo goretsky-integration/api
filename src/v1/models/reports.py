@@ -9,6 +9,7 @@ __all__ = (
     'DeliveryPartialStatisticsReport',
     'UnitKitchenPartialStatistics',
     'KitchenPartialStatisticsReport',
+    'UnitBonusSystemStatistics',
 )
 
 
@@ -55,3 +56,10 @@ class UnitKitchenPartialStatistics(BaseModel):
 class KitchenPartialStatisticsReport(BaseModel):
     results: list[UnitKitchenPartialStatistics]
     errors: list[int]
+
+
+class UnitBonusSystemStatistics(BaseModel):
+    unit_id: int
+    orders_with_phone_numbers_count: int = 0
+    orders_with_phone_numbers_percent: int = 0
+    total_orders_count: int = 0
