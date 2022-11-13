@@ -53,7 +53,7 @@ class UnitDeliveryStatistics(BaseModel):
 
 
 class OrdersHandoverTime(BaseModel):
-    unit_id: uuid.UUID = Field(alias='unitId')
+    unit_uuid: uuid.UUID = Field(alias='unitId')
     unit_name: str = Field(alias='unitName')
     order_id: uuid.UUID = Field(alias='orderId')
     order_number: str = Field(alias='orderNumber')
