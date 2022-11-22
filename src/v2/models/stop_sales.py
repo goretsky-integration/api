@@ -31,13 +31,11 @@ class StopSale(BaseModel):
     reason: str = Field()
     started_at: datetime.datetime = Field(alias='startedAt')
     ended_at: datetime.datetime | None = Field(alias='endedAt')
-    staff_name_who_stopped: str = Field(alias='staffNameWhoStopped')
-    staff_name_who_resumed: str | None = Field(alias='staffNameWhoResumed')
+    stopped_by_user_id: uuid.UUID = Field(alias='stoppedByUserId')
+    resumed_by_user_id: uuid.UUID | None = Field(alias='resumedByUserId')
 
     class Meta:
         use_enum_values = True
-
-    _get_or_none = validator('staff_name_who_resumed', 'ended_at', allow_reuse=True, pre=True)(get_or_none)
 
 
 class StopSaleByIngredients(StopSale):
