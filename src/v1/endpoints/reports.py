@@ -3,6 +3,7 @@ import asyncio
 import httpx
 from fastapi import APIRouter, Query, Body
 
+from core import config
 from v1 import exceptions
 from v1.models import RevenueStatisticsReport, CountryCode, UnitsRevenueStatistics, UnitIDsIn, \
     DeliveryPartialStatisticsReport, UnitDeliveryPartialStatistics, KitchenPartialStatisticsReport, \
@@ -34,7 +35,7 @@ async def get_revenue_statistics(
     response_model=DeliveryPartialStatisticsReport,
 )
 async def get_delivery_partial_statistics(unit_ids: UnitIDsIn, cookies: dict = Body()):
-    async with httpx.AsyncClient(cookies=cookies) as client:
+    async with httpx.AsyncClient(cookies=cookies, headers={'User-Agent': config.APP_USER_AGENT}) as client:
         tasks = (operational_statistics.get_delivery_partial_statistics(client, unit_id) for unit_id in unit_ids)
         results = await asyncio.gather(*tasks, return_exceptions=True)
     delivery_partial_statistics = [result for result in results if isinstance(result, UnitDeliveryPartialStatistics)]
@@ -47,7 +48,7 @@ async def get_delivery_partial_statistics(unit_ids: UnitIDsIn, cookies: dict = B
     response_model=KitchenPartialStatisticsReport,
 )
 async def get_kitchen_partial_statistics(unit_ids: UnitIDsIn, cookies: dict = Body()):
-    async with httpx.AsyncClient(cookies=cookies) as client:
+    async with httpx.AsyncClient(cookies=cookies, headers={'User-Agent': config.APP_USER_AGENT}) as client:
         tasks = (operational_statistics.get_kitchen_partial_statistics(client, unit_id) for unit_id in unit_ids)
         results = await asyncio.gather(*tasks, return_exceptions=True)
     kitchen_partial_statistics = [result for result in results if isinstance(result, UnitKitchenPartialStatistics)]

@@ -1,5 +1,6 @@
 import httpx
 
+from core import config
 from v2.periods import Period
 from v1 import models, parsers
 
@@ -23,7 +24,7 @@ class StopSalesAPI:
         }
         url = 'https://officemanager.dodopizza.ru/Reports/StopSaleStatistic/GetDeliverySectorsStopSaleReport'
         async with httpx.AsyncClient(cookies=self._cookies) as client:
-            response = await client.post(url, data=body)
+            response = await client.post(url, data=body, headers={'User-Agent': config.APP_USER_AGENT})
         return parsers.SectorStopSalesHTMLParser(response.text).parse()
 
     async def get_stop_sales_by_streets(self, period: Period, unit_ids: set[int]) -> list[models.StopSaleByStreet]:
@@ -36,5 +37,5 @@ class StopSalesAPI:
         }
         url = 'https://officemanager.dodopizza.ru/Reports/StopSaleStatistic/GetDeliveryUnitStopSaleReport'
         async with httpx.AsyncClient(cookies=self._cookies) as client:
-            response = await client.post(url, data=body)
+            response = await client.post(url, data=body, headers={'User-Agent': config.APP_USER_AGENT})
         return parsers.StreetStopSalesHTMLParser(response.text).parse()
