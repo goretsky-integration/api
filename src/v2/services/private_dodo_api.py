@@ -34,7 +34,7 @@ class PrivateDodoAPI:
 
     @contextlib.asynccontextmanager
     async def get_api_client(self) -> httpx.AsyncClient:
-        async with httpx.AsyncClient(base_url=self.base_url, headers=self.headers, timeout=30) as client:
+        async with httpx.AsyncClient(base_url=self.base_url, headers=self.headers, timeout=60) as client:
             yield client
 
     async def get_production_productivity_statistics(

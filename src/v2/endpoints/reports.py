@@ -163,13 +163,20 @@ async def get_delivery_productivity_statistics(
     )
     unit_uuid_to_today_statistics = {unit.unit_uuid: unit for unit in today_units_delivery_statistics}
     unit_uuid_to_week_before_statistics = {unit.unit_uuid: unit for unit in week_before_units_delivery_statistics}
-    return [
-        delivery_statistics.to_today_and_week_before_delivery_productivity(
-            unit_uuid=unit_uuid,
-            unit_today_delivery_statistics=unit_uuid_to_today_statistics[unit_uuid],
-            unit_week_delivery_statistics=unit_uuid_to_week_before_statistics[unit_uuid],
-        ) for unit_uuid in unit_uuids
-    ]
+    response = []
+    for unit_uuid in unit_uuids:
+        try:
+            unit_today_delivery_statistics = unit_uuid_to_today_statistics[unit_uuid]
+            unit_week_delivery_statistics = unit_uuid_to_week_before_statistics[unit_uuid]
+        except KeyError:
+            response.append(UnitDeliveryProductivityStatistics(unit_uuid=unit_uuid))
+        else:
+            response.append(delivery_statistics.to_today_and_week_before_delivery_productivity(
+                unit_uuid,
+                unit_today_delivery_statistics,
+                unit_week_delivery_statistics,
+            ))
+    return response
 
 
 @router.get(

@@ -44,9 +44,9 @@ class UnitDeliverySpeedStatistics(BaseModel):
 
 class UnitDeliveryProductivityStatistics(BaseModel):
     unit_uuid: uuid.UUID
-    orders_per_courier_labour_hour_today: float
-    orders_per_courier_labour_hour_week_before: float
-    from_week_before_in_percents: int
+    orders_per_courier_labour_hour_today: float = 0
+    orders_per_courier_labour_hour_week_before: float = 0
+    from_week_before_in_percents: int = 0
 
 
 class UnitHeatedShelfTimeStatistics(BaseModel):
