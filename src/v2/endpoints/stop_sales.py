@@ -13,6 +13,7 @@ router = APIRouter(prefix='/v2/{country_code}/stop-sales', tags=['Stop sales'])
 @router.get(
     path='/channels',
     response_model=list[StopSaleBySalesChannels],
+    response_model_by_alias=False,
 )
 async def get_stop_sales_by_sales_channels(
         country_code: CountryCode,
@@ -29,6 +30,7 @@ async def get_stop_sales_by_sales_channels(
 @router.get(
     path='/ingredients',
     response_model=list[StopSaleByIngredients],
+    response_model_by_alias=False,
 )
 async def get_stop_sales_by_ingredients(
         country_code: CountryCode,
