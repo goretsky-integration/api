@@ -25,7 +25,13 @@ class SalesChannel(enum.Enum):
     DELIVERY = 'Delivery'
 
 
+class ChannelStopType(enum.Enum):
+    COMPLETE = 'Complete'
+    REDIRECTION = 'Redirection'
+
+
 class StopSale(BaseModel):
+    id: uuid.UUID
     unit_uuid: uuid.UUID = Field(alias='unitId')
     unit_name: str = Field(alias='unitName')
     reason: str = Field()
@@ -44,3 +50,4 @@ class StopSaleByIngredients(StopSale):
 
 class StopSaleBySalesChannels(StopSale):
     sales_channel_name: SalesChannel = Field(alias='salesChannelName')
+    channel_stop_type: ChannelStopType = Field(alias='channelStopType')
