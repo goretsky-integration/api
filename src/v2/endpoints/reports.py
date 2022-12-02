@@ -47,7 +47,7 @@ async def get_productivity_balance_statistics(
         unit_uuids: UnitUUIDsIn = Query(),
         token: str = Depends(AccessTokenBearer()),
 ):
-    period = Period(start=datetime.datetime(2022, 10, 25), end=Period.today().end)
+    period = Period.today()
     api = PrivateDodoAPI(token, country_code)
     productivity_statistics, units_delivery_statistics, stop_sales = await asyncio.gather(
         api.get_production_productivity_statistics(period, unit_uuids),
