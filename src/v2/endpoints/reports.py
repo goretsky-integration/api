@@ -10,7 +10,8 @@ from fastapi import APIRouter, Depends, Query
 from v2 import models
 from v2.endpoints.bearer import AccessTokenBearer
 from v2.models import UnitUUIDsIn, CountryCode, UnitProductivityBalanceStatistics, \
-    UnitBeingLateCertificatesTodayAndWeekBefore, UnitDeliveryProductivityStatistics
+    UnitBeingLateCertificatesTodayAndWeekBefore, UnitDeliveryProductivityStatistics, SalesChannel
+from v2.models.stop_sales import ChannelStopType
 from v2.periods import Period
 from v2.services import production_statistics, delivery_statistics
 from v2.services.private_dodo_api import PrivateDodoAPI
@@ -59,7 +60,6 @@ async def get_productivity_balance_statistics(
     unit_uuid_to_unit_stop_sales = collections.defaultdict(list)
     for stop_sale in stop_sales:
         unit_uuid_to_unit_stop_sales[stop_sale.unit_uuid].append(stop_sale)
-
     response = []
     for unit_uuid in unit_uuids:
         sales_per_labor_hour = 0
@@ -72,7 +72,9 @@ async def get_productivity_balance_statistics(
         if unit_uuid in unit_uuid_to_unit_stop_sales:
             stop_sales = unit_uuid_to_unit_stop_sales[unit_uuid]
             for stop_sale in stop_sales:
-                if stop_sale.sales_channel_name != 'Delivery':
+                if stop_sale.sales_channel_name.name != SalesChannel.DELIVERY.name:
+                    continue
+                if stop_sale.channel_stop_type.name != ChannelStopType.COMPLETE.name:
                     continue
                 ended_at = stop_sale.ended_at
                 if stop_sale.ended_at is None:

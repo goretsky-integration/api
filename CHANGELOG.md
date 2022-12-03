@@ -1,3 +1,10 @@
+2022-12-03
+---
+
+### Fixed
+
+- Stop sale by channel duration in `productivity balance` report.
+
 2022-11-25
 --- 
 
