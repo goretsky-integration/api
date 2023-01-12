@@ -24,6 +24,7 @@ def calculate_average_tracking_pending_and_cooking_time(
         orders: Iterable[models.OrdersHandoverTime],
 ) -> int:
     average_tracking_pending_and_cooking_time = 0
+    # TODO pass orders only from "dine-in" sales channel
     if orders:
         average_cooking_time = statistics.mean(
             [order.cooking_time for order in orders
