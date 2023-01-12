@@ -102,7 +102,8 @@ async def get_restaurant_cooking_time_statistics(
     period = Period.today()
     api = PrivateDodoAPI(token, country_code)
     orders = await api.get_orders_handover_time_statistics(period, unit_uuids)
-    unit_uuid_to_orders = production_statistics.group_by_unit_uuids(orders)
+    unique_orders = remove_duplicated_orders(orders)
+    unit_uuid_to_orders = production_statistics.group_by_unit_uuids(unique_orders)
     return [production_statistics.orders_to_restaurant_cooking_time_dto(unit_uuid, unit_uuid_to_orders[unit_uuid])
             for unit_uuid in unit_uuids]
 

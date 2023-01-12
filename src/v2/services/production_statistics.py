@@ -8,6 +8,11 @@ from v2 import models
 T = TypeVar('T')
 
 
+def remove_duplicated_orders(orders: Iterable[models.OrdersHandoverTime]) -> tuple[models.OrdersHandoverTime, ...]:
+    unique_orders: dict[uuid.UUID, models.OrdersHandoverTime] = {order.order_id: order for order in orders}
+    return tuple(unique_orders.values())
+
+
 def group_by_unit_uuids(items: Iterable[T]) -> DefaultDict[uuid.UUID, list[T]]:
     uuid_to_items = collections.defaultdict(list)
     for item in items:
