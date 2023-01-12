@@ -1,3 +1,11 @@
+2023-01-12
+---
+
+### Fixed
+
+- `RestaurantCookingTime` report's orders dublicating.
+
+
 2022-12-03
 ---
 
