@@ -15,6 +15,7 @@ from v2.models.stop_sales import ChannelStopType
 from v2.periods import Period
 from v2.services import production_statistics, delivery_statistics
 from v2.services.private_dodo_api import PrivateDodoAPI
+from v2.services.production_statistics import remove_duplicated_orders
 
 router = APIRouter(prefix='/v2/{country_code}/reports', tags=['Reports'])
 
