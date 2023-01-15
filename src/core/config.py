@@ -20,7 +20,6 @@ class AppSettings(BaseSettings):
     host: str = Field(..., env='APP_HOST')
     is_debug: bool = Field(..., env='IS_DEBUG')
     redis_url: str = Field(..., env='REDIS_URL')
-    use_cache: bool = Field(..., env='USE_CACHE')
 
 
 app_settings = AppSettings()
