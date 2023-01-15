@@ -1,10 +1,15 @@
+import pathlib
 import unicodedata
 import uuid
 from abc import ABC, abstractmethod
 from typing import Any
 
+import openpyxl
 from bs4 import BeautifulSoup
+from openpyxl.workbook import Workbook
+from openpyxl.worksheet.worksheet import Worksheet
 
+from v1 import models
 from v1.models import (
     StopSaleBySector,
     StopSaleByStreet,
@@ -25,6 +30,8 @@ __all__ = (
     'StockBalanceHTMLParser',
     'OrderByUUIDParser',
     'OrdersPartial',
+    'ExcelParser',
+    'DeliveryStatisticsExcelParser',
 )
 
 
@@ -204,3 +211,36 @@ class OrderByUUIDParser(HTMLParser):
             price=self._order_price,
             type=self._order_type,
         )
+
+
+class ExcelParser(ABC):
+
+    def __init__(self, file_path: str | pathlib.Path):
+        self._wb: Workbook = openpyxl.load_workbook(file_path, read_only=True)
+        self._ws: Worksheet = self._wb.active
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.close()
+
+    def close(self) -> None:
+        self._wb.close()
+
+    @abstractmethod
+    def parse(self):
+        pass
+
+
+class DeliveryStatisticsExcelParser(ExcelParser):
+
+    def parse(self) -> list[models.TripsWithOneOrder]:
+        rows = self._ws['A7': f'N{self._ws.max_row}']
+        result = []
+        for row in rows:
+            unit_name, *_, trips_with_one_order_percentage = [cell.value for cell in row]
+            trips_with_one_order = models.TripsWithOneOrder(unit_name=unit_name,
+                                                            percentage=round(trips_with_one_order_percentage * 100, 2))
+            result.append(trips_with_one_order)
+        return result
