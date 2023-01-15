@@ -16,6 +16,7 @@ from v2.periods import Period
 from v2.services import production_statistics, delivery_statistics
 from v2.services.private_dodo_api import PrivateDodoAPI
 from v2.services.production_statistics import remove_duplicated_orders
+from v2.services.delivery import count_late_delivery_vouchers
 
 router = APIRouter(prefix='/v2/{country_code}/reports', tags=['Reports'])
 
@@ -192,20 +193,18 @@ async def get_being_late_certificates_for_today_and_week_before(
         unit_uuids: UnitUUIDsIn = Query(),
         token: str = Depends(AccessTokenBearer()),
 ):
-    today_period = Period.today()
-    week_before_period = Period.week_before()
     api = PrivateDodoAPI(token, country_code)
-    today_units_delivery_statistics, week_before_units_delivery_statistics = await asyncio.gather(
-        api.get_delivery_statistics(today_period, unit_uuids),
-        api.get_delivery_statistics(week_before_period, unit_uuids),
+    today, week_before = Period.today(), Period.week_before()
+    today_vouchers, week_before_vouchers = await asyncio.gather(
+        api.get_late_delivery_vouchers(today, unit_uuids),
+        api.get_late_delivery_vouchers(week_before, unit_uuids),
     )
-    unit_uuid_to_today_count = {unit.unit_uuid: unit.late_orders_count for unit in today_units_delivery_statistics}
-    unit_uuid_to_week_before_count = {unit.unit_uuid: unit.late_orders_count for unit in
-                                      week_before_units_delivery_statistics}
+    today_vouchers_count = count_late_delivery_vouchers(today_vouchers)
+    week_before_vouchers_count = count_late_delivery_vouchers(week_before_vouchers)
     return [
         UnitBeingLateCertificatesTodayAndWeekBefore(
             unit_uuid=unit_uuid,
-            certificates_count_today=unit_uuid_to_today_count.get(unit_uuid, 0),
-            certificates_count_week_before=unit_uuid_to_week_before_count.get(unit_uuid, 0),
+            certificates_count_today=today_vouchers_count.get(unit_uuid, 0),
+            certificates_count_week_before=week_before_vouchers_count.get(unit_uuid, 0),
         ) for unit_uuid in unit_uuids
     ]

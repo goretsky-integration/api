@@ -126,3 +126,26 @@ class PrivateDodoAPI:
         elif response.status_code == 401:
             raise exceptions.Unauthorized
         return parse_obj_as(list[models.OrdersHandoverTime], response.json()['ordersHandoverTime'])
+
+    async def get_late_delivery_vouchers(
+            self,
+            period: Period,
+            unit_uuids: Iterable[uuid.UUID],
+    ) -> tuple[models.LateDeliveryVoucher, ...]:
+        params = {
+            'units': stringify_uuids(unit_uuids),
+            'from': period.start.strftime('%Y-%m-%dT00:00:00'),
+            'to': period.end.strftime('%Y-%m-%dT00:00:00'),
+            'take': 1000,
+            'skip': 0,
+        }
+        vouchers = []
+        async with self.get_api_client() as client:
+            while True:
+                response = await client.get('/delivery/vouchers', params=params)
+                response_data = response.json()
+                if response_data['isEndOfListReached']:
+                    vouchers += response_data['vouchers']
+                    break
+                params['skip'] = params['skip'] + 1000
+        return parse_obj_as(tuple[models.LateDeliveryVoucher, ...], vouchers)
