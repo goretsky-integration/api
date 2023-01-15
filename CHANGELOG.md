@@ -1,3 +1,15 @@
+2023-01-15
+---
+
+### Added
+
+- Add report endpoint's caching.
+
+### Changed
+
+- Use [late delivery vouchers](https://dodo-brands.stoplight.io/docs/dodo-is/f3c261f246fc0-dostavka-sertifikaty-za-opozdanie) API endpoint instead of [delivery statistics](https://dodo-brands.stoplight.io/docs/dodo-is/2845c1de4776d-dostavka-statistika).
+
+
 2023-01-12
 ---
 
