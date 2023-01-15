@@ -6,6 +6,7 @@ import uuid
 from typing import Iterable
 
 from fastapi import APIRouter, Depends, Query
+from fastapi_cache.decorator import cache
 
 from v2 import models
 from v2.endpoints.bearer import AccessTokenBearer
@@ -45,6 +46,7 @@ def zip_by_unit_uuid(
     path='/productivity-balance',
     response_model=list[UnitProductivityBalanceStatistics],
 )
+@cache(expire=60, namespace='productivity-balance')
 async def get_productivity_balance_statistics(
         country_code: CountryCode,
         unit_uuids: UnitUUIDsIn = Query(),
@@ -96,6 +98,7 @@ async def get_productivity_balance_statistics(
     path='/restaurant-cooking-time',
     response_model=list[models.UnitRestaurantCookingTimeStatistics],
 )
+@cache(expire=60, namespace='restaurant-cooking-time')
 async def get_restaurant_cooking_time_statistics(
         country_code: CountryCode,
         unit_uuids: UnitUUIDsIn = Query(),
@@ -114,6 +117,7 @@ async def get_restaurant_cooking_time_statistics(
     path='/heated-shelf-time',
     response_model=list[models.UnitHeatedShelfTimeStatistics],
 )
+@cache(expire=60, namespace='heated-shelf-time')
 async def get_heated_shelf_time_statistics(
         country_code: CountryCode,
         unit_uuids: UnitUUIDsIn = Query(),
@@ -134,6 +138,7 @@ async def get_heated_shelf_time_statistics(
     path='/delivery-speed',
     response_model=list[models.UnitDeliverySpeedStatistics],
 )
+@cache(expire=60, namespace='delivery-speed')
 async def get_delivery_speed_statistics(
         country_code: CountryCode,
         unit_uuids: UnitUUIDsIn = Query(),
@@ -154,6 +159,7 @@ async def get_delivery_speed_statistics(
     path='/delivery-productivity',
     response_model=list[UnitDeliveryProductivityStatistics],
 )
+@cache(expire=60, namespace='delivery-productivity')
 async def get_delivery_productivity_statistics(
         country_code: CountryCode,
         unit_uuids: UnitUUIDsIn = Query(),
@@ -188,6 +194,7 @@ async def get_delivery_productivity_statistics(
     path='/being-late-certificates',
     response_model=list[UnitBeingLateCertificatesTodayAndWeekBefore],
 )
+@cache(expire=60, namespace='being-late-certificates')
 async def get_being_late_certificates_for_today_and_week_before(
         country_code: CountryCode,
         unit_uuids: UnitUUIDsIn = Query(),

@@ -2,6 +2,7 @@ import asyncio
 
 import httpx
 from fastapi import APIRouter, Body
+from fastapi_cache.decorator import cache
 
 from core import config
 from v1 import exceptions
@@ -15,6 +16,7 @@ router = APIRouter(prefix='/stocks', tags=['Stocks'])
     path='/',
     response_model=StockBalanceStatistics,
 )
+@cache(expire=60, namespace='ingredient-stocks')
 async def get_ingredient_stocks(
         unit_ids: UnitIDsIn,
         cookies: dict = Body(),
