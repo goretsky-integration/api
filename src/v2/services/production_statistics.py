@@ -24,14 +24,10 @@ def calculate_average_tracking_pending_and_cooking_time(
         orders: Iterable[models.OrdersHandoverTime],
 ) -> int:
     average_tracking_pending_and_cooking_time = 0
-    # TODO pass orders only from "dine-in" sales channel
+    orders = [order for order in orders if order.sales_channel.name == models.SalesChannel.DINE_IN.name]
     if orders:
-        average_cooking_time = statistics.mean(
-            [order.cooking_time for order in orders
-             if order.sales_channel.name == models.SalesChannel.DINE_IN.name])
-        average_tracking_pending_time = statistics.mean(
-            [order.tracking_pending_time for order in orders
-             if order.sales_channel.name == models.SalesChannel.DINE_IN.name])
+        average_cooking_time = statistics.mean([order.cooking_time for order in orders])
+        average_tracking_pending_time = statistics.mean([order.tracking_pending_time for order in orders])
         average_tracking_pending_and_cooking_time = average_cooking_time + average_tracking_pending_time
     return average_tracking_pending_and_cooking_time
 
