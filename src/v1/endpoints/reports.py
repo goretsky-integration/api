@@ -1,16 +1,19 @@
 import asyncio
+import tempfile
 
 import httpx
 from fastapi import APIRouter, Query, Body
 
 from core import config
-from v1 import exceptions
+from v1 import exceptions, models
 from v1.models import RevenueStatisticsReport, CountryCode, UnitsRevenueStatistics, UnitIDsIn, \
     DeliveryPartialStatisticsReport, UnitDeliveryPartialStatistics, KitchenPartialStatisticsReport, \
     UnitKitchenPartialStatistics, UnitBonusSystemStatistics, UnitIdsAndNamesIn
 from v1.services import public_dodo_api, operational_statistics
+from v1.parsers import DeliveryStatisticsExcelParser
 from v1.services.operational_statistics import calculate_units_revenue, calculate_total_revenue
 from v1.services.orders import get_restaurant_orders
+from v1.services.delivery import get_delivery_statistics_excel
 from v2.periods import Period
 
 router = APIRouter(tags=['Reports'])
@@ -89,3 +92,18 @@ async def get_bonus_system_statistics(
     missing_unit_ids = unit_ids - existing_unit_ids
     results += [UnitBonusSystemStatistics(unit_id=unit_id) for unit_id in missing_unit_ids]
     return results
+
+
+@router.post(
+    path='/v1/reports/trips-with-one-order',
+    response_model=list[models.TripsWithOneOrder],
+)
+async def on_get_trips_with_one_order(
+        unit_ids: set[int] = Body(),
+        cookies: dict = Body(),
+):
+    with httpx.Client(cookies=cookies) as client:
+        delivery_statistics_excel = get_delivery_statistics_excel(client, unit_ids, Period.today())
+    with tempfile.NamedTemporaryFile(suffix='.xlsx') as temp_file:
+        temp_file.write(delivery_statistics_excel)
+        return DeliveryStatisticsExcelParser(temp_file.name).parse()
