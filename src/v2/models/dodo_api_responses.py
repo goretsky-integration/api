@@ -9,6 +9,8 @@ __all__ = (
     'UnitDeliveryStatistics',
     'OrdersHandoverTime',
     'SalesChannel',
+    'LateDeliveryVoucher',
+    'LateDeliveryVoucherIssuer',
 )
 
 
@@ -62,3 +64,20 @@ class OrdersHandoverTime(BaseModel):
     tracking_pending_time: int = Field(alias='trackingPendingTime')
     cooking_time: int = Field(alias='cookingTime')
     heated_shelf_time: int = Field(alias='heatedShelfTime')
+
+
+class LateDeliveryVoucherIssuer(enum.Enum):
+    SYSTEM = 'System'
+    CONTACT_CENTER = 'ContactCenter'
+
+
+class LateDeliveryVoucher(BaseModel):
+    order_id: uuid.UUID = Field(alias='orderId')
+    order_number: str = Field(alias='orderNumber')
+    order_accepted_at_local: datetime.datetime = Field(alias='orderAcceptedAtLocal')
+    unit_uuid: uuid.UUID = Field(alias='unitId')
+    predicted_delivery_time_local: datetime.datetime = Field(alias='predictedDeliveryTimeLocal')
+    order_fulfilment_flag_at_local: datetime.datetime | None = Field(alias='orderFulfilmentFlagAtLocal')
+    delivery_deadline_local: datetime.datetime = Field(alias='deliveryDeadlineLocal')
+    issuer_name: LateDeliveryVoucherIssuer | None = Field(alias='issuerName')
+    courier_staff_id: uuid.UUID | None = Field(alias='courierStaffId')
