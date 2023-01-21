@@ -2,7 +2,7 @@ import asyncio
 import tempfile
 
 import httpx
-from fastapi import APIRouter, Query, Body
+from fastapi import APIRouter, Query, Body, Request
 from fastapi_cache.decorator import cache
 
 from core import config
@@ -10,11 +10,11 @@ from v1 import exceptions, models
 from v1.models import RevenueStatisticsReport, CountryCode, UnitsRevenueStatistics, UnitIDsIn, \
     DeliveryPartialStatisticsReport, UnitDeliveryPartialStatistics, KitchenPartialStatisticsReport, \
     UnitKitchenPartialStatistics, UnitBonusSystemStatistics, UnitIdsAndNamesIn
-from v1.services import public_dodo_api, operational_statistics
 from v1.parsers import DeliveryStatisticsExcelParser
+from v1.services import public_dodo_api, operational_statistics
+from v1.services.delivery import get_delivery_statistics_excel
 from v1.services.operational_statistics import calculate_units_revenue, calculate_total_revenue
 from v1.services.orders import get_restaurant_orders
-from v1.services.delivery import get_delivery_statistics_excel
 from v2.periods import Period
 
 router = APIRouter(tags=['Reports'])
@@ -35,13 +35,12 @@ async def get_revenue_statistics(
     return RevenueStatisticsReport(results=UnitsRevenueStatistics(units=units, total=total), errors=response.errors)
 
 
-@router.post(
+@router.get(
     path='/v1/reports/awaiting-orders',
     response_model=DeliveryPartialStatisticsReport,
 )
-@cache(expire=60, namespace='awaiting-orders')
-async def get_delivery_partial_statistics(unit_ids: UnitIDsIn, cookies: dict = Body()):
-    async with httpx.AsyncClient(cookies=cookies, headers={'User-Agent': config.APP_USER_AGENT}) as client:
+async def get_delivery_partial_statistics(request: Request, unit_ids: set[int] = Query()):
+    async with httpx.AsyncClient(cookies=request.cookies, headers={'User-Agent': config.APP_USER_AGENT}) as client:
         tasks = (operational_statistics.get_delivery_partial_statistics(client, unit_id) for unit_id in unit_ids)
         results = await asyncio.gather(*tasks, return_exceptions=True)
     delivery_partial_statistics = [result for result in results if isinstance(result, UnitDeliveryPartialStatistics)]
@@ -49,13 +48,13 @@ async def get_delivery_partial_statistics(unit_ids: UnitIDsIn, cookies: dict = B
     return DeliveryPartialStatisticsReport(results=delivery_partial_statistics, errors=errors)
 
 
-@router.post(
+@router.get(
     path='/v1/reports/kitchen-productivity',
     response_model=KitchenPartialStatisticsReport,
 )
-@cache(expire=60, namespace='kitchen-productivity')
-async def get_kitchen_partial_statistics(unit_ids: UnitIDsIn, cookies: dict = Body()):
-    async with httpx.AsyncClient(cookies=cookies, headers={'User-Agent': config.APP_USER_AGENT}) as client:
+@cache(expire=60)
+async def get_kitchen_partial_statistics(request: Request, unit_ids: set[int] = Query()):
+    async with httpx.AsyncClient(cookies=request.cookies, headers={'User-Agent': config.APP_USER_AGENT}) as client:
         tasks = (operational_statistics.get_kitchen_partial_statistics(client, unit_id) for unit_id in unit_ids)
         results = await asyncio.gather(*tasks, return_exceptions=True)
     kitchen_partial_statistics = [result for result in results if isinstance(result, UnitKitchenPartialStatistics)]
@@ -67,7 +66,6 @@ async def get_kitchen_partial_statistics(unit_ids: UnitIDsIn, cookies: dict = Bo
     path='/v1/reports/bonus-system',
     response_model=list[UnitBonusSystemStatistics],
 )
-@cache(expire=60, namespace='bonus-system')
 async def get_bonus_system_statistics(
         units: UnitIdsAndNamesIn = Body(),
         cookies: dict = Body(),
@@ -99,15 +97,12 @@ async def get_bonus_system_statistics(
     return results
 
 
-@router.post(
+@router.get(
     path='/v1/reports/trips-with-one-order',
     response_model=list[models.TripsWithOneOrder],
 )
-async def on_get_trips_with_one_order(
-        unit_ids: set[int] = Body(),
-        cookies: dict = Body(),
-):
-    with httpx.Client(cookies=cookies) as client:
+async def on_get_trips_with_one_order(request: Request, unit_ids: set[int] = Query()):
+    with httpx.Client(cookies=request.cookies) as client:
         delivery_statistics_excel = get_delivery_statistics_excel(client, unit_ids, Period.today())
     with tempfile.NamedTemporaryFile(suffix='.xlsx') as temp_file:
         temp_file.write(delivery_statistics_excel)
