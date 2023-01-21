@@ -2,7 +2,7 @@ import asyncio
 import tempfile
 
 import httpx
-from fastapi import APIRouter, Query, Body
+from fastapi import APIRouter, Query, Body, Cookie, Request
 from fastapi_cache.decorator import cache
 
 from core import config
@@ -39,8 +39,7 @@ async def get_revenue_statistics(
     path='/v1/reports/awaiting-orders',
     response_model=DeliveryPartialStatisticsReport,
 )
-@cache(expire=60, namespace='awaiting-orders')
-async def get_delivery_partial_statistics(unit_ids: UnitIDsIn, cookies: dict = Body()):
+async def get_delivery_partial_statistics(unit_ids: UnitIDsIn = Body(), cookies: dict = Body()):
     async with httpx.AsyncClient(cookies=cookies, headers={'User-Agent': config.APP_USER_AGENT}) as client:
         tasks = (operational_statistics.get_delivery_partial_statistics(client, unit_id) for unit_id in unit_ids)
         results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -53,7 +52,6 @@ async def get_delivery_partial_statistics(unit_ids: UnitIDsIn, cookies: dict = B
     path='/v1/reports/kitchen-productivity',
     response_model=KitchenPartialStatisticsReport,
 )
-@cache(expire=60, namespace='kitchen-productivity')
 async def get_kitchen_partial_statistics(unit_ids: UnitIDsIn, cookies: dict = Body()):
     async with httpx.AsyncClient(cookies=cookies, headers={'User-Agent': config.APP_USER_AGENT}) as client:
         tasks = (operational_statistics.get_kitchen_partial_statistics(client, unit_id) for unit_id in unit_ids)
@@ -67,7 +65,6 @@ async def get_kitchen_partial_statistics(unit_ids: UnitIDsIn, cookies: dict = Bo
     path='/v1/reports/bonus-system',
     response_model=list[UnitBonusSystemStatistics],
 )
-@cache(expire=60, namespace='bonus-system')
 async def get_bonus_system_statistics(
         units: UnitIdsAndNamesIn = Body(),
         cookies: dict = Body(),
