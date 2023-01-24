@@ -7,7 +7,10 @@ from pydantic import parse_obj_as
 from v2 import models, exceptions
 from v2.periods import Period, round_to_hours
 from v2.services.http_client_factories import HTTPClient
-from v2.services.private_dodo_api import stringify_uuids
+
+
+def stringify_uuids(uuids: Iterable[UUID]) -> str:
+    return ','.join((uuid_item.hex for uuid_item in uuids))
 
 
 @dataclass(frozen=True, slots=True)
