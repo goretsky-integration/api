@@ -30,3 +30,11 @@ class OfficeManagerAPI:
         if response.is_error:
             raise exceptions.UnitIDAPIError(unit_id=unit_id)
         return parsers.KitchenStatisticsHTMLParser(response.text, unit_id).parse()
+
+    async def get_stocks_balance(self, unit_id: int | str) -> list[models.StockBalance]:
+        url = '/OfficeManager/StockBalance/Get'
+        params = {'unitId': unit_id}
+        response = await self.__client.get(url, params=params)
+        if response.is_error:
+            raise exceptions.UnitIDAPIError(unit_id=unit_id)
+        return parsers.StockBalanceHTMLParser(response.text, unit_id).parse()
