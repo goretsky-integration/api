@@ -5,10 +5,10 @@ from fastapi import Depends, Query
 from core import config
 from v2.endpoints.bearer import AccessTokenBearer
 from v2.periods import Period
-from v2.services.http_client_factories import closing_dodo_is_api_client_factory
+from services.http_client_factories import closing_dodo_is_api_client_factory
 
 
-def get_closing_dodo_is_api_client_factory(
+def get_closing_dodo_is_api_client(
         *,
         country_code: str,
         token: str = Depends(AccessTokenBearer()),

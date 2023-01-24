@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, Query
 from fastapi_cache.decorator import cache
 
 from v2 import models
-from v2.endpoints.dependencies import get_closing_dodo_is_api_client_factory
+from v2.endpoints.dependencies import get_closing_dodo_is_api_client
 from v2.models import UnitUUIDsIn, UnitProductivityBalanceStatistics, \
     UnitBeingLateCertificatesTodayAndWeekBefore, UnitDeliveryProductivityStatistics, SalesChannel
 from v2.models.stop_sales import ChannelStopType
@@ -15,7 +15,7 @@ from v2.periods import Period
 from v2.services import production_statistics, delivery_statistics
 from v2.services.delivery import count_late_delivery_vouchers
 from v2.services.external_dodo_api import DodoISAPI
-from v2.services.http_client_factories import HTTPClient
+from services.http_client_factories import HTTPClient
 from v2.services.production_statistics import remove_duplicated_orders
 
 router = APIRouter(prefix='/v2/{country_code}/reports', tags=['Reports'])
@@ -47,7 +47,7 @@ def zip_by_unit_uuid(
 )
 @cache(expire=60, namespace='productivity-balance')
 async def get_productivity_balance_statistics(
-        closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client_factory),
+        closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
         unit_uuids: UnitUUIDsIn = Query(),
 ):
     period = Period.today()
@@ -99,7 +99,7 @@ async def get_productivity_balance_statistics(
 )
 @cache(expire=60, namespace='restaurant-cooking-time')
 async def get_restaurant_cooking_time_statistics(
-        closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client_factory),
+        closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
         unit_uuids: UnitUUIDsIn = Query(),
 ):
     period = Period.today()
@@ -118,7 +118,7 @@ async def get_restaurant_cooking_time_statistics(
 )
 @cache(expire=60, namespace='heated-shelf-time')
 async def get_heated_shelf_time_statistics(
-        closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client_factory),
+        closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
         unit_uuids: UnitUUIDsIn = Query(),
 ):
     period = Period.today()
@@ -139,7 +139,7 @@ async def get_heated_shelf_time_statistics(
 )
 @cache(expire=60, namespace='delivery-speed')
 async def get_delivery_speed_statistics(
-        closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client_factory),
+        closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
         unit_uuids: UnitUUIDsIn = Query(),
 ):
     period = Period.today()
@@ -160,7 +160,7 @@ async def get_delivery_speed_statistics(
 )
 @cache(expire=60, namespace='delivery-productivity')
 async def get_delivery_productivity_statistics(
-        closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client_factory),
+        closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
         unit_uuids: UnitUUIDsIn = Query(),
 ):
     today_period = Period.today()
@@ -195,7 +195,7 @@ async def get_delivery_productivity_statistics(
 )
 @cache(expire=60, namespace='being-late-certificates')
 async def get_being_late_certificates_for_today_and_week_before(
-        closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client_factory),
+        closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
         unit_uuids: UnitUUIDsIn = Query(),
 ):
     today, week_before = Period.today(), Period.week_before()
