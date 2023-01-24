@@ -1,11 +1,10 @@
-import datetime
-
 from fastapi import APIRouter, Depends, Query
 
-from v2.models import StopSaleBySalesChannels, CountryCode, UnitUUIDsIn, StopSaleByIngredients
-from v2.endpoints.bearer import AccessTokenBearer
+from v2.endpoints.dependencies import get_closing_dodo_is_api_client_factory, get_period
+from v2.models import StopSaleBySalesChannels, UnitUUIDsIn, StopSaleByIngredients
 from v2.periods import Period
-from v2.services.private_dodo_api import PrivateDodoAPI
+from v2.services.external_dodo_api import DodoISAPI
+from v2.services.http_client_factories import HTTPClient
 
 router = APIRouter(prefix='/v2/{country_code}/stop-sales', tags=['Stop sales'])
 
@@ -16,15 +15,13 @@ router = APIRouter(prefix='/v2/{country_code}/stop-sales', tags=['Stop sales'])
     response_model_by_alias=False,
 )
 async def get_stop_sales_by_sales_channels(
-        country_code: CountryCode,
+        closing_dodo_is_api_client_factory: HTTPClient = Depends(get_closing_dodo_is_api_client_factory),
         unit_uuids: UnitUUIDsIn = Query(),
-        start: datetime.datetime = Query(),
-        end: datetime.datetime = Query(),
-        token: str = Depends(AccessTokenBearer()),
+        period: Period = Depends(get_period),
 ):
-    period = Period(start, end)
-    api = PrivateDodoAPI(token, country_code)
-    return await api.get_stop_sales_by_sales_channels(period, unit_uuids)
+    async with closing_dodo_is_api_client_factory as client:
+        api = DodoISAPI(client)
+        return api.get_stop_sales_by_sales_channels(period, unit_uuids)
 
 
 @router.get(
@@ -33,13 +30,10 @@ async def get_stop_sales_by_sales_channels(
     response_model_by_alias=False,
 )
 async def get_stop_sales_by_ingredients(
-        country_code: CountryCode,
+        closing_dodo_is_api_client_factory: HTTPClient = Depends(get_closing_dodo_is_api_client_factory),
         unit_uuids: UnitUUIDsIn = Query(),
-        start: datetime.datetime = Query(),
-        end: datetime.datetime = Query(),
-        token: str = Depends(AccessTokenBearer()),
-
+        period: Period = Depends(get_period),
 ):
-    period = Period(start, end)
-    api = PrivateDodoAPI(token, country_code)
-    return await api.get_stop_sales_by_ingredients(period, unit_uuids)
+    async with closing_dodo_is_api_client_factory as client:
+        api = DodoISAPI(client)
+        return api.get_stop_sales_by_ingredients(period, unit_uuids)
