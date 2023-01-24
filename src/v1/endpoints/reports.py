@@ -2,19 +2,22 @@ import asyncio
 import tempfile
 
 import httpx
-from fastapi import APIRouter, Query, Body
+from fastapi import APIRouter, Query, Body, Depends
 from fastapi_cache.decorator import cache
 
 from core import config
+from services.http_client_factories import HTTPClient
 from v1 import exceptions, models
-from v1.models import RevenueStatisticsReport, CountryCode, UnitsRevenueStatistics, UnitIDsIn, \
+from v1.endpoints.dependencies import get_closing_public_api_client
+from v1.models import RevenueStatisticsReport, UnitsRevenueStatistics, UnitIDsIn, \
     DeliveryPartialStatisticsReport, UnitDeliveryPartialStatistics, KitchenPartialStatisticsReport, \
     UnitKitchenPartialStatistics, UnitBonusSystemStatistics, UnitIdsAndNamesIn
-from v1.services import public_dodo_api, operational_statistics
 from v1.parsers import DeliveryStatisticsExcelParser
+from v1.services import operational_statistics
+from v1.services.delivery import get_delivery_statistics_excel
+from v1.services.external_dodo_api import DodoPublicAPI, get_operational_statistics_for_today_and_week_before_batch
 from v1.services.operational_statistics import calculate_units_revenue, calculate_total_revenue
 from v1.services.orders import get_restaurant_orders
-from v1.services.delivery import get_delivery_statistics_excel
 from v2.periods import Period
 
 router = APIRouter(tags=['Reports'])
@@ -26,13 +29,20 @@ router = APIRouter(tags=['Reports'])
 )
 @cache(expire=60, namespace='revenue')
 async def get_revenue_statistics(
-        country_code: CountryCode,
+        closing_public_api_client: HTTPClient = Depends(get_closing_public_api_client),
         unit_ids: UnitIDsIn = Query(),
 ):
-    response = await public_dodo_api.get_operational_statistics_for_today_and_week_before_batch(country_code, unit_ids)
-    units = calculate_units_revenue(response.results)
-    total = calculate_total_revenue(response.results)
-    return RevenueStatisticsReport(results=UnitsRevenueStatistics(units=units, total=total), errors=response.errors)
+    async with closing_public_api_client as client:
+        api = DodoPublicAPI(client)
+        units_statistics = await get_operational_statistics_for_today_and_week_before_batch(
+            dodo_public_api=api, unit_ids=unit_ids
+        )
+    units_revenue = calculate_units_revenue(units_statistics.results)
+    total_revenue = calculate_total_revenue(units_statistics.results)
+    return RevenueStatisticsReport(
+        results=UnitsRevenueStatistics(units=units_revenue, total=total_revenue),
+        errors=units_statistics.errors,
+    )
 
 
 @router.post(
