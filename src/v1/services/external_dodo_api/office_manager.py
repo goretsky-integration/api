@@ -1,7 +1,11 @@
+from typing import Iterable
+
 from services.http_client_factories import HTTPClient
 from v1 import exceptions, models, parsers
 
 __all__ = ('OfficeManagerAPI',)
+
+from v2.periods import Period
 
 
 class OfficeManagerAPI:
@@ -38,3 +42,13 @@ class OfficeManagerAPI:
         if response.is_error:
             raise exceptions.UnitIDAPIError(unit_id=unit_id)
         return parsers.StockBalanceHTMLParser(response.text, unit_id).parse()
+
+    async def get_delivery_statistics_excel(self, unit_ids: Iterable[int], period: Period) -> bytes:
+        url = '/Reports/DeliveryStatistic/Export'
+        request_data = {
+            'unitsIds': tuple(unit_ids),
+            'beginDate': period.start.strftime('%d.%m.%Y'),
+            'endDate': period.end.strftime('%d.%m.%Y'),
+        }
+        response = await self.__client.post(url, data=request_data)
+        return response.content
