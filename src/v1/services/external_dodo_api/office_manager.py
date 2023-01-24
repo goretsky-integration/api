@@ -1,11 +1,13 @@
 from typing import Iterable
 
+import pandas as pd
+from pandas.core.groupby import DataFrameGroupBy
+
 from services.http_client_factories import HTTPClient
 from v1 import exceptions, models, parsers
+from v2.periods import Period
 
 __all__ = ('OfficeManagerAPI',)
-
-from v2.periods import Period
 
 
 class OfficeManagerAPI:
@@ -52,3 +54,20 @@ class OfficeManagerAPI:
         }
         response = await self.__client.post(url, data=request_data)
         return response.content
+
+    async def get_restaurant_orders(
+            self,
+            unit_ids: Iterable[int | str],
+            period: Period,
+    ) -> DataFrameGroupBy:
+        url = 'https://officemanager.dodopizza.ru/Reports/Orders/Get'
+        request_data = {
+            'filterType': 'OrdersFromRestaurant',
+            'unitsIds': tuple(unit_ids),
+            'OrderSources': 'Restaurant',
+            'beginDate': period.start.strftime('%d.%m.%Y'),
+            'endDate': period.end.strftime('%d.%m.%Y'),
+            'orderTypes': ['Delivery', 'Pickup', 'Stationary']
+        }
+        response = await self.__client.post(url, data=request_data)
+        return pd.read_html(response.text)[0].groupby('Отдел')

@@ -3,9 +3,7 @@ from typing import Iterable, Sequence, AsyncGenerator
 
 import httpx
 import pandas as pd
-from pandas.core.groupby import DataFrameGroupBy
 
-from core import config
 from v1 import models, parsers
 from v2.periods import Period
 
@@ -31,26 +29,6 @@ def restaurant_orders_to_cheated_orders(
                 orders=cheated_orders
             ))
     return result
-
-
-async def get_restaurant_orders(
-        cookies: dict,
-        unit_ids: Iterable[int | str],
-        period: Period,
-) -> DataFrameGroupBy:
-    """Get DataFrame with orders."""
-    url = 'https://officemanager.dodopizza.ru/Reports/Orders/Get'
-    headers = {'User-Agent': config.APP_USER_AGENT}
-    async with httpx.AsyncClient(cookies=cookies) as client:
-        response = await client.post(url, timeout=30, headers=headers, data={
-            'filterType': 'OrdersFromRestaurant',
-            'unitsIds': tuple(unit_ids),
-            'OrderSources': 'Restaurant',
-            'beginDate': period.start.strftime('%d.%m.%Y'),
-            'endDate': period.end.strftime('%d.%m.%Y'),
-            'orderTypes': ['Delivery', 'Pickup', 'Stationary']
-        })
-        return pd.read_html(response.text)[0].groupby('Отдел')
 
 
 async def get_canceled_orders_partial(
