@@ -7,6 +7,7 @@ __all__ = (
     'closing_dodo_is_api_client_factory',
     'closing_office_manager_api_client_factory',
     'closing_public_api_client_factory',
+    'closing_shift_manager_api_client_factory',
     'HTTPClient',
 )
 
@@ -32,6 +33,14 @@ async def closing_public_api_client_factory(*, country_code: str, app_user_agent
 @contextlib.asynccontextmanager
 async def closing_office_manager_api_client_factory(*, country_code: str, app_user_agent: str) -> HTTPClient:
     base_url = f'https://officemanager.dodopizza.{country_code}/'
+    headers = {'User-Agent': app_user_agent}
+    async with httpx.AsyncClient(headers=headers, base_url=base_url, timeout=120) as client:
+        yield client
+
+
+@contextlib.asynccontextmanager
+async def closing_shift_manager_api_client_factory(*, country_code: str, app_user_agent: str) -> HTTPClient:
+    base_url = f'https://shiftmanager.dodopizza.{country_code}/'
     headers = {'User-Agent': app_user_agent}
     async with httpx.AsyncClient(headers=headers, base_url=base_url, timeout=120) as client:
         yield client
