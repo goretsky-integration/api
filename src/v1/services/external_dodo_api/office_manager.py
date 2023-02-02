@@ -71,3 +71,27 @@ class OfficeManagerAPI:
         }
         response = await self.__client.post(url, data=request_data)
         return pd.read_html(response.text)[0].groupby('Отдел')
+
+    async def get_stop_sales_by_sectors(self, period: Period, unit_ids: set[int]) -> list[models.StopSaleBySector]:
+        request_data = {
+            'UnitsIds': tuple(unit_ids),
+            'stop_type': 4,
+            'productOrIngredientStopReasons': tuple(range(7)),
+            'beginDate': period.start.strftime('%d.%m.%Y'),
+            'endDate': period.end.strftime('%d.%m.%Y'),
+        }
+        url = '/Reports/StopSaleStatistic/GetDeliverySectorsStopSaleReport'
+        response = await self.__client.post(url, data=request_data)
+        return parsers.SectorStopSalesHTMLParser(response.text).parse()
+
+    async def get_stop_sales_by_streets(self, period: Period, unit_ids: set[int]) -> list[models.StopSaleByStreet]:
+        request_data = {
+            'UnitsIds': tuple(unit_ids),
+            'stop_type': 3,
+            'productOrIngredientStopReasons': tuple(range(7)),
+            'beginDate': period.start.strftime('%d.%m.%Y'),
+            'endDate': period.end.strftime('%d.%m.%Y'),
+        }
+        url = '/Reports/StopSaleStatistic/GetDeliveryUnitStopSaleReport'
+        response = await self.__client.post(url, data=request_data)
+        return parsers.StreetStopSalesHTMLParser(response.text).parse()
