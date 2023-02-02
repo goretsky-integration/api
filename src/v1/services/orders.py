@@ -1,11 +1,8 @@
-import uuid
-from typing import Iterable, Sequence, AsyncGenerator
+from typing import Iterable, Sequence
 
-import httpx
 import pandas as pd
 
-from v1 import models, parsers
-from v2.periods import Period
+from v1 import models
 
 
 def restaurant_orders_to_cheated_orders(
@@ -29,34 +26,3 @@ def restaurant_orders_to_cheated_orders(
                 orders=cheated_orders
             ))
     return result
-
-
-async def get_canceled_orders_partial(
-        cookies: dict, period: Period
-) -> AsyncGenerator[list[models.OrderPartial], None]:
-    url = 'https://shiftmanager.dodopizza.ru/Managment/ShiftManagment/PartialShiftOrders'
-    params = {
-        'page': 1,
-        'date': period.end.date().isoformat(),
-        'orderStateFilter': 'Failure',
-    }
-    async with httpx.AsyncClient(cookies=cookies) as client:
-        while True:
-            response = await client.get(url, params=params, timeout=30)
-            orders = parsers.OrdersPartial(response.text).parse()
-            yield orders
-            if not orders:
-                break
-            params['page'] += 1
-
-
-async def get_order_by_uuid(cookies: dict, order_uuid: uuid.UUID,
-                            order_price: int, order_type: str) -> models.OrderByUUID:
-    url = 'https://shiftmanager.dodopizza.ru/Managment/ShiftManagment/Order'
-    params = {'orderUUId': order_uuid.hex}
-
-    async with httpx.AsyncClient(cookies=cookies) as client:
-        response = await client.get(url, params=params, timeout=30)
-        if not response.is_success:
-            raise exceptions.OrderByUUIDAPIError(order_uuid=order_uuid, order_price=order_price, order_type=order_type)
-        return parsers.OrderByUUIDParser(response.text, order_uuid, order_price, order_type).parse()
