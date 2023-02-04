@@ -1,11 +1,8 @@
-import datetime
-
-from fastapi import Depends, Query
+from fastapi import Depends
 
 from core import config
-from v2.endpoints.bearer import AccessTokenBearer
-from services.periods import Period
 from services.http_client_factories import closing_dodo_is_api_client_factory
+from v2.endpoints.bearer import AccessTokenBearer
 
 
 def get_closing_dodo_is_api_client(
@@ -18,11 +15,3 @@ def get_closing_dodo_is_api_client(
         token=token,
         app_user_agent=config.APP_USER_AGENT,
     )
-
-
-def get_period(
-        *,
-        start: datetime.datetime = Query(),
-        end: datetime.datetime = Query(),
-) -> Period:
-    return Period(start=start, end=end)
