@@ -6,7 +6,7 @@ from pydantic import parse_obj_as
 
 from v2 import models, exceptions
 from v2.periods import Period, round_to_hours
-from v2.services.http_client_factories import HTTPClient
+from services.http_client_factories import HTTPClient
 
 
 def stringify_uuids(uuids: Iterable[UUID]) -> str:
