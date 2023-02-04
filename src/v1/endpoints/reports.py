@@ -125,7 +125,7 @@ async def get_bonus_system_statistics(
     return results
 
 
-@router.post(
+@router.get(
     path='/v1/reports/trips-with-one-order',
     response_model=list[models.TripsWithOneOrder],
 )
