@@ -3,9 +3,7 @@ from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
 
-import v1.endpoints
-import v2.endpoints
-from api.errors import include_exception_handlers
+import api
 from core.config import app_settings
 
 __all__ = ('get_application',)
@@ -18,12 +16,12 @@ async def on_startup():
 
 def get_application() -> FastAPI:
     app = FastAPI()
-    app.include_router(v1.endpoints.reports.router)
-    app.include_router(v2.endpoints.reports.router)
-    app.include_router(v1.endpoints.stop_sales.router)
-    app.include_router(v2.endpoints.stop_sales.router)
-    app.include_router(v1.endpoints.stocks.router)
-    app.include_router(v1.endpoints.orders.router)
-    include_exception_handlers(app)
+    app.include_router(api.v1.reports.router)
+    app.include_router(api.v1.orders.router)
+    app.include_router(api.v1.stocks.router)
+    app.include_router(api.v1.stop_sales.router)
+    app.include_router(api.v2.reports.router)
+    app.include_router(api.v2.stop_sales.router)
+    api.errors.include_exception_handlers(app)
     app.add_event_handler('startup', on_startup)
     return app

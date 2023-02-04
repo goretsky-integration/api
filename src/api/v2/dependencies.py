@@ -2,7 +2,7 @@ from fastapi import Depends
 
 from core import config
 from services.http_client_factories import closing_dodo_is_api_client_factory
-from v2.endpoints.bearer import AccessTokenBearer
+from api.v2.bearer import AccessTokenBearer
 
 
 def get_closing_dodo_is_api_client(

@@ -10,8 +10,8 @@ from services.external_dodo_api import DodoISAPI
 from services.http_client_factories import HTTPClient
 from services.periods import Period
 from v2 import models
-from v2.endpoints import schemas
-from v2.endpoints.dependencies import get_closing_dodo_is_api_client
+from api.v2 import schemas
+from api.v2.dependencies import get_closing_dodo_is_api_client
 from v2.models import (
     UnitBeingLateCertificatesTodayAndWeekBefore,
     UnitDeliveryProductivityStatistics,

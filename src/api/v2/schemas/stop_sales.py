@@ -1,13 +1,10 @@
 import datetime
 from enum import Enum
-from typing import TypeAlias
 from uuid import UUID
 
-from pydantic import BaseModel, conset
+from pydantic import BaseModel
 
-__all__ = ('StopSaleByIngredients', 'StopSaleBySalesChannels', 'UnitUUIDs')
-
-UnitUUIDs: TypeAlias = conset(UUID, min_items=1, max_items=30)
+__all__ = ('StopSaleByIngredients', 'StopSaleBySalesChannels')
 
 
 class StopSale(BaseModel):

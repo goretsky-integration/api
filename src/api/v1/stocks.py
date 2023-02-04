@@ -6,7 +6,7 @@ from services.external_dodo_api import OfficeManagerAPI
 from services.http_client_factories import HTTPClient
 from v1 import exceptions
 from v1.endpoints import schemas
-from v1.endpoints.dependencies import get_closing_office_manager_api_client
+from v1.endpoints import get_closing_office_manager_api_client
 from v1.models import StockBalanceStatistics
 
 router = APIRouter(prefix='/stocks', tags=['Stocks'])

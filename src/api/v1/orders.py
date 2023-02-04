@@ -7,7 +7,7 @@ from services.external_dodo_api import OfficeManagerAPI, ShiftManagerAPI
 from services.http_client_factories import HTTPClient
 from services.periods import Period
 from v1.endpoints import schemas
-from v1.endpoints.dependencies import get_closing_office_manager_api_client, get_closing_shift_manager_api_client
+from v1.endpoints import get_closing_office_manager_api_client, get_closing_shift_manager_api_client
 from v1.models import UnitIdsAndNamesIn, CheatedOrders
 from v1.services.orders import restaurant_orders_to_cheated_orders
 

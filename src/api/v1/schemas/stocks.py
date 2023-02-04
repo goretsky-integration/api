@@ -1,13 +1,8 @@
-from typing import TypeAlias
-
-from pydantic import BaseModel, conset
+from pydantic import BaseModel
 
 __all__ = (
-    'UnitIDs',
     'StockBalanceStatistics',
 )
-
-UnitIDs: TypeAlias = conset(int, min_items=1, max_items=30)
 
 
 class IngredientStocksBalance(BaseModel):
