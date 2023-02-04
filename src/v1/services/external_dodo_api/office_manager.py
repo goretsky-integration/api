@@ -5,7 +5,7 @@ from pandas.core.groupby import DataFrameGroupBy
 
 from services.http_client_factories import HTTPClient
 from v1 import exceptions, models, parsers
-from v2.periods import Period
+from services.periods import Period
 
 __all__ = ('OfficeManagerAPI',)
 

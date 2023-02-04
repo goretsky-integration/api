@@ -25,7 +25,7 @@ from v1.services.external_dodo_api import (
     get_operational_statistics_for_today_and_week_before_batch,
 )
 from v1.services.operational_statistics import calculate_units_revenue, calculate_total_revenue
-from v2.periods import Period
+from services.periods import Period
 
 router = APIRouter(tags=['Reports'])
 

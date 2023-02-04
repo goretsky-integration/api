@@ -7,7 +7,7 @@ from v1.endpoints.dependencies import get_closing_office_manager_api_client, get
 from v1.models import UnitIdsAndNamesIn, CheatedOrders, OrderByUUID
 from v1.services.external_dodo_api import OfficeManagerAPI, ShiftManagerAPI
 from v1.services.orders import restaurant_orders_to_cheated_orders
-from v2.periods import Period
+from services.periods import Period
 
 router = APIRouter(prefix='/v1', tags=['Orders'])
 

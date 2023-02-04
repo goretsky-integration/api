@@ -3,7 +3,7 @@ from uuid import UUID
 
 from services.http_client_factories import HTTPClient
 from v1 import parsers, models
-from v2.periods import Period
+from services.periods import Period
 
 __all__ = ('ShiftManagerAPI',)
 

@@ -4,7 +4,7 @@ from fastapi import Depends, Query
 
 from core import config
 from v2.endpoints.bearer import AccessTokenBearer
-from v2.periods import Period
+from services.periods import Period
 from services.http_client_factories import closing_dodo_is_api_client_factory
 
 

@@ -7,7 +7,7 @@ from services.http_client_factories import HTTPClient
 from v1.endpoints.dependencies import get_closing_office_manager_api_client
 from v1.models import StopSaleBySector, StopSaleByStreet
 from v1.services.external_dodo_api import OfficeManagerAPI
-from v2.periods import Period
+from services.periods import Period
 
 router = APIRouter(prefix='/v1/{country_code}/stop-sales', tags=['Stop sales'])
 

@@ -5,7 +5,7 @@ from uuid import UUID
 from pydantic import parse_obj_as
 
 from v2 import models, exceptions
-from v2.periods import Period, round_to_hours
+from services.periods import Period, round_to_hours
 from services.http_client_factories import HTTPClient
 
 
