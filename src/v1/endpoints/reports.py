@@ -1,5 +1,6 @@
 import asyncio
 import tempfile
+from typing import Iterable
 
 from fastapi import APIRouter, Query, Body, Depends
 from fastapi_cache.decorator import cache
@@ -11,7 +12,8 @@ from services.external_dodo_api import (
 )
 from services.http_client_factories import HTTPClient
 from services.periods import Period
-from v1 import exceptions, models
+from v1 import exceptions
+from v1.endpoints import schemas
 from v1.endpoints.dependencies import get_closing_public_api_client, get_closing_office_manager_api_client
 from v1.models import (
     RevenueStatisticsReport,
@@ -27,18 +29,17 @@ from v1.models import (
 from v1.parsers import DeliveryStatisticsExcelParser
 from v1.services.operational_statistics import calculate_units_revenue, calculate_total_revenue
 
-router = APIRouter(tags=['Reports'])
+router = APIRouter(prefix='/v1/{country_code}/reports', tags=['Reports'])
 
 
 @router.get(
-    path='/v1/{country_code}/reports/revenue',
-    response_model=RevenueStatisticsReport,
+    path='/revenue',
 )
 @cache(expire=60, namespace='revenue')
 async def get_revenue_statistics(
         closing_public_api_client: HTTPClient = Depends(get_closing_public_api_client),
         unit_ids: UnitIDsIn = Query(),
-):
+) -> schemas.RevenueStatisticsReport:
     async with closing_public_api_client as client:
         api = DodoPublicAPI(client)
         units_statistics = await get_operational_statistics_for_today_and_week_before_batch(
@@ -53,14 +54,13 @@ async def get_revenue_statistics(
 
 
 @router.get(
-    path='/v1/reports/awaiting-orders',
-    response_model=DeliveryPartialStatisticsReport,
+    path='/awaiting-orders',
 )
 @cache(expire=60, namespace='awaiting-orders')
 async def get_delivery_partial_statistics(
         unit_ids: UnitIDsIn = Query(),
         closing_office_manager_api_client: HTTPClient = Depends(get_closing_office_manager_api_client),
-):
+) -> schemas.DeliveryPartialStatisticsReport:
     async with closing_office_manager_api_client as client:
         api = OfficeManagerAPI(client)
         tasks = (api.get_delivery_partial_statistics(unit_id) for unit_id in unit_ids)
@@ -71,14 +71,13 @@ async def get_delivery_partial_statistics(
 
 
 @router.get(
-    path='/v1/reports/kitchen-productivity',
-    response_model=KitchenPartialStatisticsReport,
+    path='/kitchen-productivity',
 )
 @cache(expire=60, namespace='kitchen-productivity')
 async def get_kitchen_partial_statistics(
         unit_ids: UnitIDsIn = Query(),
         closing_office_manager_api_client: HTTPClient = Depends(get_closing_office_manager_api_client),
-):
+) -> schemas.KitchenPartialStatisticsReport:
     async with closing_office_manager_api_client as client:
         api = OfficeManagerAPI(client)
         tasks = (api.get_kitchen_partial_statistics(unit_id) for unit_id in unit_ids)
@@ -89,13 +88,12 @@ async def get_kitchen_partial_statistics(
 
 
 @router.post(
-    path='/v1/reports/bonus-system',
-    response_model=list[UnitBonusSystemStatistics],
+    path='/bonus-system',
 )
 async def get_bonus_system_statistics(
         unit_ids_and_names: UnitIdsAndNamesIn = Body(),
         closing_office_manager_api_client: HTTPClient = Depends(get_closing_office_manager_api_client),
-):
+) -> Iterable[schemas.UnitBonusSystemStatistics]:
     period = Period.today()
     unit_ids = {unit.id for unit in unit_ids_and_names}
     async with closing_office_manager_api_client as client:
@@ -125,13 +123,12 @@ async def get_bonus_system_statistics(
 
 
 @router.get(
-    path='/v1/reports/trips-with-one-order',
-    response_model=list[models.TripsWithOneOrder],
+    path='/trips-with-one-order',
 )
 async def on_get_trips_with_one_order(
-        unit_ids: set[int] = Body(),
+        unit_ids: UnitIDsIn = Query(),
         closing_office_manager_api_client: HTTPClient = Depends(get_closing_office_manager_api_client),
-):
+) -> Iterable[schemas.TripsWithOneOrder]:
     period = Period.today()
     async with closing_office_manager_api_client as client:
         api = OfficeManagerAPI(client)
