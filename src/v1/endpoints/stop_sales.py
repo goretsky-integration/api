@@ -3,11 +3,11 @@ import datetime
 from fastapi import APIRouter, Body, Depends
 from pydantic import conset
 
+from services.external_dodo_api import OfficeManagerAPI
 from services.http_client_factories import HTTPClient
+from services.periods import Period
 from v1.endpoints.dependencies import get_closing_office_manager_api_client
 from v1.models import StopSaleBySector, StopSaleByStreet
-from v1.services.external_dodo_api import OfficeManagerAPI
-from services.periods import Period
 
 router = APIRouter(prefix='/v1/{country_code}/stop-sales', tags=['Stop sales'])
 

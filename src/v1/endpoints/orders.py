@@ -2,12 +2,12 @@ import asyncio
 
 from fastapi import APIRouter, Body, Depends
 
+from services.external_dodo_api import OfficeManagerAPI, ShiftManagerAPI
 from services.http_client_factories import HTTPClient
+from services.periods import Period
 from v1.endpoints.dependencies import get_closing_office_manager_api_client, get_closing_shift_manager_api_client
 from v1.models import UnitIdsAndNamesIn, CheatedOrders, OrderByUUID
-from v1.services.external_dodo_api import OfficeManagerAPI, ShiftManagerAPI
 from v1.services.orders import restaurant_orders_to_cheated_orders
-from services.periods import Period
 
 router = APIRouter(prefix='/v1', tags=['Orders'])
 

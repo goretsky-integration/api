@@ -6,16 +6,21 @@ from typing import Iterable
 from fastapi import APIRouter, Depends, Query
 from fastapi_cache.decorator import cache
 
+from services.external_dodo_api import DodoISAPI
+from services.http_client_factories import HTTPClient
+from services.periods import Period
 from v2 import models
 from v2.endpoints.dependencies import get_closing_dodo_is_api_client
-from v2.models import UnitUUIDsIn, UnitProductivityBalanceStatistics, \
-    UnitBeingLateCertificatesTodayAndWeekBefore, UnitDeliveryProductivityStatistics, SalesChannel
+from v2.models import (
+    UnitUUIDsIn,
+    UnitProductivityBalanceStatistics,
+    UnitBeingLateCertificatesTodayAndWeekBefore,
+    UnitDeliveryProductivityStatistics,
+    SalesChannel,
+)
 from v2.models.stop_sales import ChannelStopType
-from services.periods import Period
 from v2.services import production_statistics, delivery_statistics
 from v2.services.delivery import count_late_delivery_vouchers
-from v2.services.external_dodo_api import DodoISAPI
-from services.http_client_factories import HTTPClient
 from v2.services.production_statistics import remove_duplicated_orders
 
 router = APIRouter(prefix='/v2/{country_code}/reports', tags=['Reports'])

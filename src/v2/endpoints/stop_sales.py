@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, Query
 
+from services.external_dodo_api import DodoISAPI
+from services.http_client_factories import HTTPClient
+from services.periods import Period
 from v2.endpoints.dependencies import get_closing_dodo_is_api_client, get_period
 from v2.models import StopSaleBySalesChannels, UnitUUIDsIn, StopSaleByIngredients
-from services.periods import Period
-from v2.services.external_dodo_api import DodoISAPI
-from services.http_client_factories import HTTPClient
 
 router = APIRouter(prefix='/v2/{country_code}/stop-sales', tags=['Stop sales'])
 

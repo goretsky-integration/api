@@ -2,11 +2,11 @@ import asyncio
 
 from fastapi import APIRouter, Body, Depends
 
+from services.external_dodo_api import OfficeManagerAPI
 from services.http_client_factories import HTTPClient
 from v1 import exceptions
 from v1.endpoints.dependencies import get_closing_office_manager_api_client
 from v1.models import UnitIDsIn, StockBalanceStatistics
-from v1.services.external_dodo_api import OfficeManagerAPI
 
 router = APIRouter(prefix='/stocks', tags=['Stocks'])
 

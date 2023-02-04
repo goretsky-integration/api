@@ -4,7 +4,13 @@ import tempfile
 from fastapi import APIRouter, Query, Body, Depends
 from fastapi_cache.decorator import cache
 
+from services.external_dodo_api import (
+    DodoPublicAPI,
+    OfficeManagerAPI,
+    get_operational_statistics_for_today_and_week_before_batch,
+)
 from services.http_client_factories import HTTPClient
+from services.periods import Period
 from v1 import exceptions, models
 from v1.endpoints.dependencies import get_closing_public_api_client, get_closing_office_manager_api_client
 from v1.models import (
@@ -19,13 +25,7 @@ from v1.models import (
     UnitIdsAndNamesIn,
 )
 from v1.parsers import DeliveryStatisticsExcelParser
-from v1.services.external_dodo_api import (
-    DodoPublicAPI,
-    OfficeManagerAPI,
-    get_operational_statistics_for_today_and_week_before_batch,
-)
 from v1.services.operational_statistics import calculate_units_revenue, calculate_total_revenue
-from services.periods import Period
 
 router = APIRouter(tags=['Reports'])
 
@@ -88,13 +88,12 @@ async def get_kitchen_partial_statistics(
     return KitchenPartialStatisticsReport(results=kitchen_partial_statistics, errors=errors)
 
 
-@router.get(
+@router.post(
     path='/v1/reports/bonus-system',
     response_model=list[UnitBonusSystemStatistics],
 )
-@cache(expire=60, namespace='bonus-system')
 async def get_bonus_system_statistics(
-        unit_ids_and_names: UnitIdsAndNamesIn = Query(),
+        unit_ids_and_names: UnitIdsAndNamesIn = Body(),
         closing_office_manager_api_client: HTTPClient = Depends(get_closing_office_manager_api_client),
 ):
     period = Period.today()
