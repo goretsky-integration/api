@@ -10,10 +10,9 @@ from services.external_dodo_api import DodoISAPI
 from services.http_client_factories import HTTPClient
 from services.periods import Period
 from v2 import models
+from v2.endpoints import schemas
 from v2.endpoints.dependencies import get_closing_dodo_is_api_client
 from v2.models import (
-    UnitUUIDsIn,
-    UnitProductivityBalanceStatistics,
     UnitBeingLateCertificatesTodayAndWeekBefore,
     UnitDeliveryProductivityStatistics,
     SalesChannel,
@@ -48,13 +47,12 @@ def zip_by_unit_uuid(
 
 @router.get(
     path='/productivity-balance',
-    response_model=list[UnitProductivityBalanceStatistics],
 )
 @cache(expire=60, namespace='productivity-balance')
 async def get_productivity_balance_statistics(
+        unit_uuids: schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
-        unit_uuids: UnitUUIDsIn = Query(),
-):
+) -> Iterable[schemas.UnitProductivityBalanceStatistics]:
     period = Period.today()
     async with closing_dodo_is_api_client as client:
         api = DodoISAPI(client)
@@ -100,13 +98,12 @@ async def get_productivity_balance_statistics(
 
 @router.get(
     path='/restaurant-cooking-time',
-    response_model=list[models.UnitRestaurantCookingTimeStatistics],
 )
 @cache(expire=60, namespace='restaurant-cooking-time')
 async def get_restaurant_cooking_time_statistics(
+        unit_uuids: schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
-        unit_uuids: UnitUUIDsIn = Query(),
-):
+) -> Iterable[schemas.UnitRestaurantCookingTimeStatistics]:
     period = Period.today()
     async with closing_dodo_is_api_client as client:
         api = DodoISAPI(client)
@@ -119,13 +116,12 @@ async def get_restaurant_cooking_time_statistics(
 
 @router.get(
     path='/heated-shelf-time',
-    response_model=list[models.UnitHeatedShelfTimeStatistics],
 )
 @cache(expire=60, namespace='heated-shelf-time')
 async def get_heated_shelf_time_statistics(
+        unit_uuids: schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
-        unit_uuids: UnitUUIDsIn = Query(),
-):
+) -> Iterable[schemas.UnitHeatedShelfTimeStatistics]:
     period = Period.today()
     async with closing_dodo_is_api_client as client:
         api = DodoISAPI(client)
@@ -140,13 +136,12 @@ async def get_heated_shelf_time_statistics(
 
 @router.get(
     path='/delivery-speed',
-    response_model=list[models.UnitDeliverySpeedStatistics],
 )
 @cache(expire=60, namespace='delivery-speed')
 async def get_delivery_speed_statistics(
+        unit_uuids: schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
-        unit_uuids: UnitUUIDsIn = Query(),
-):
+) -> Iterable[schemas.UnitDeliverySpeedStatistics]:
     period = Period.today()
     async with closing_dodo_is_api_client as client:
         api = DodoISAPI(client)
@@ -161,13 +156,12 @@ async def get_delivery_speed_statistics(
 
 @router.get(
     path='/delivery-productivity',
-    response_model=list[UnitDeliveryProductivityStatistics],
 )
 @cache(expire=60, namespace='delivery-productivity')
 async def get_delivery_productivity_statistics(
+        unit_uuids: schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
-        unit_uuids: UnitUUIDsIn = Query(),
-):
+) -> Iterable[schemas.UnitDeliveryProductivityStatistics]:
     today_period = Period.today()
     week_before_period = Period.week_before_to_this_time()
     async with closing_dodo_is_api_client as client:
@@ -196,13 +190,12 @@ async def get_delivery_productivity_statistics(
 
 @router.get(
     path='/being-late-certificates',
-    response_model=list[UnitBeingLateCertificatesTodayAndWeekBefore],
 )
 @cache(expire=60, namespace='being-late-certificates')
 async def get_being_late_certificates_for_today_and_week_before(
+        unit_uuids: schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
-        unit_uuids: UnitUUIDsIn = Query(),
-):
+) -> Iterable[schemas.UnitBeingLateCertificatesTodayAndWeekBefore]:
     today, week_before = Period.today(), Period.week_before()
     async with closing_dodo_is_api_client as client:
         api = DodoISAPI(client)
