@@ -5,7 +5,6 @@ from pydantic import BaseModel, Field
 __all__ = (
     'OperationalStatistics',
     'UnitOperationalStatisticsForTodayAndWeekBefore',
-    'UnitBeingLateCertificates',
 )
 
 
@@ -30,9 +29,3 @@ class UnitOperationalStatisticsForTodayAndWeekBefore(BaseModel):
 
     class Config:
         allow_population_by_field_name = True
-
-
-class UnitBeingLateCertificates(BaseModel):
-    unit_id: int
-    unit_name: str
-    certificates_count: int

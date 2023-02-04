@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from dataclasses import dataclass
 
 __all__ = (
     'StockBalance',
@@ -6,7 +6,8 @@ __all__ = (
 )
 
 
-class StockBalance(BaseModel):
+@dataclass(frozen=True, slots=True)
+class StockBalance:
     unit_id: int
     ingredient_name: str
     days_left: int
@@ -14,6 +15,7 @@ class StockBalance(BaseModel):
     stocks_unit: str
 
 
-class StockBalanceStatistics(BaseModel):
+@dataclass(frozen=True, slots=True)
+class StockBalanceStatistics:
     units: list[StockBalance]
     error_unit_ids: list[int]
