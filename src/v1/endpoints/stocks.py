@@ -1,35 +1,38 @@
 import asyncio
 
-import httpx
-from fastapi import APIRouter, Body
-from fastapi_cache.decorator import cache
+from fastapi import APIRouter, Body, Depends
 
-from core import config
+from services.http_client_factories import HTTPClient
 from v1 import exceptions
-from v1.models import UnitIDsIn, StockBalance, StockBalanceStatistics
-from v1.services.stocks import get_stocks_balance
+from v1.endpoints.dependencies import get_closing_office_manager_api_client
+from v1.models import UnitIDsIn, StockBalanceStatistics
+from v1.services.external_dodo_api import OfficeManagerAPI
 
 router = APIRouter(prefix='/stocks', tags=['Stocks'])
 
 
-@router.post(
+@router.get(
     path='/',
     response_model=StockBalanceStatistics,
 )
-@cache(expire=60, namespace='ingredient-stocks')
 async def get_ingredient_stocks(
         unit_ids: UnitIDsIn,
-        cookies: dict = Body(),
         days_left_threshold: int = Body(),
+        closing_office_manager_api_client: HTTPClient = Depends(get_closing_office_manager_api_client),
 ):
-    async with httpx.AsyncClient(cookies=cookies, headers={'User-Agent': config.APP_USER_AGENT}) as client:
-        tasks = (get_stocks_balance(client, unit_id) for unit_id in unit_ids)
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-    stocks_balances = [i for result in results if isinstance(result, list)
-                       for i in result
-                       if i.days_left <= days_left_threshold]
-    errors = [result.unit_id for result in results if isinstance(result, exceptions.UnitIDAPIError)]
-    return StockBalanceStatistics(
-        units=stocks_balances,
-        error_unit_ids=errors,
-    )
+    async with closing_office_manager_api_client as client:
+        api = OfficeManagerAPI(client)
+        tasks = (api.get_stocks_balance(unit_id) for unit_id in unit_ids)
+        units_stocks_balance = await asyncio.gather(*tasks, return_exceptions=True)
+    stocks_balances = [
+        ingredient_stocks
+        for unit_stocks_balance in units_stocks_balance
+        if isinstance(unit_stocks_balance, list)
+        for ingredient_stocks in unit_stocks_balance
+        if ingredient_stocks.days_left <= days_left_threshold
+    ]
+    errors = [
+        unit_stocks_balance.unit_id for unit_stocks_balance in units_stocks_balance
+        if isinstance(unit_stocks_balance, exceptions.UnitIDAPIError)
+    ]
+    return StockBalanceStatistics(units=stocks_balances, error_unit_ids=errors)
