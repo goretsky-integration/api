@@ -13,7 +13,7 @@ class ShiftManagerAPI:
     def __init__(self, client: HTTPClient):
         self.__client = client
 
-    async def get_partial_canceled_orders(self, period: Period) -> AsyncGenerator[models.OrderPartial, None, None]:
+    async def get_partial_canceled_orders(self, period: Period) -> AsyncGenerator[list[models.OrderPartial], None]:
         url = '/Managment/ShiftManagment/PartialShiftOrders'
         request_params = {
             'page': 1,
@@ -28,8 +28,12 @@ class ShiftManagerAPI:
                 break
             request_params['page'] += 1
 
-    async def get_order_detail(self, order_uuid: UUID,
-                               order_price: int, order_type: str) -> models.OrderByUUID:
+    async def get_order_detail(
+            self,
+            order_uuid: UUID,
+            order_price: int,
+            order_type: str,
+    ) -> models.OrderByUUID:
         url = '/Managment/ShiftManagment/Order'
         request_params = {'orderUUId': order_uuid.hex}
         response = await self.__client.get(url, params=request_params, timeout=30)
