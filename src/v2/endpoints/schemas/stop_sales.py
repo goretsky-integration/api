@@ -7,7 +7,7 @@ from pydantic import BaseModel, conset
 
 __all__ = ('StopSaleByIngredients', 'StopSaleBySalesChannels', 'UnitUUIDs')
 
-UnitUUIDs: TypeAlias = conset(min_items=1, max_items=30)
+UnitUUIDs: TypeAlias = conset(UUID, min_items=1, max_items=30)
 
 
 class StopSale(BaseModel):
