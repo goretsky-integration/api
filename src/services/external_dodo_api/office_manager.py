@@ -3,9 +3,10 @@ from typing import Iterable
 import pandas as pd
 from pandas.core.groupby import DataFrameGroupBy
 
-from services.http_client_factories import HTTPClient
-from v1 import exceptions, models
+from core import exceptions
+from models.external_api_responses import office_manager as office_manager_models
 from services import parsers
+from services.http_client_factories import HTTPClient
 from services.periods import Period
 
 __all__ = ('OfficeManagerAPI',)
@@ -19,7 +20,7 @@ class OfficeManagerAPI:
     async def get_delivery_partial_statistics(
             self,
             unit_id: int,
-    ) -> models.UnitDeliveryPartialStatistics:
+    ) -> office_manager_models.UnitDeliveryPartialStatistics:
         url = '/OfficeManager/OperationalStatistics/DeliveryWorkPartial'
         params = {'unitId': unit_id}
         response = await self.__client.get(url, params=params)
@@ -30,7 +31,7 @@ class OfficeManagerAPI:
     async def get_kitchen_partial_statistics(
             self,
             unit_id: int,
-    ) -> models.UnitKitchenPartialStatistics:
+    ) -> office_manager_models.UnitKitchenPartialStatistics:
         url = '/OfficeManager/OperationalStatistics/KitchenPartial'
         params = {'unitId': unit_id}
         response = await self.__client.get(url, params=params)
@@ -38,7 +39,7 @@ class OfficeManagerAPI:
             raise exceptions.UnitIDAPIError(unit_id=unit_id)
         return parsers.KitchenStatisticsHTMLParser(response.text, unit_id).parse()
 
-    async def get_stocks_balance(self, unit_id: int | str) -> list[models.StockBalance]:
+    async def get_stocks_balance(self, unit_id: int | str) -> list[office_manager_models.StockBalance]:
         url = '/OfficeManager/StockBalance/Get'
         params = {'unitId': unit_id}
         response = await self.__client.get(url, params=params)
@@ -73,7 +74,9 @@ class OfficeManagerAPI:
         response = await self.__client.post(url, data=request_data)
         return pd.read_html(response.text)[0].groupby('Отдел')
 
-    async def get_stop_sales_by_sectors(self, period: Period, unit_ids: set[int]) -> list[models.StopSaleBySector]:
+    async def get_stop_sales_by_sectors(
+            self, period: Period, unit_ids: set[int]
+    ) -> list[office_manager_models.StopSaleBySector]:
         request_data = {
             'UnitsIds': tuple(unit_ids),
             'stop_type': 4,
@@ -85,7 +88,9 @@ class OfficeManagerAPI:
         response = await self.__client.post(url, data=request_data)
         return parsers.SectorStopSalesHTMLParser(response.text).parse()
 
-    async def get_stop_sales_by_streets(self, period: Period, unit_ids: set[int]) -> list[models.StopSaleByStreet]:
+    async def get_stop_sales_by_streets(
+            self, period: Period, unit_ids: set[int],
+    ) -> list[office_manager_models.StopSaleByStreet]:
         request_data = {
             'UnitsIds': tuple(unit_ids),
             'stop_type': 3,

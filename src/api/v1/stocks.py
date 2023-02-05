@@ -2,12 +2,13 @@ import asyncio
 
 from fastapi import APIRouter, Depends, Query
 
+from api import common_schemas
+from api.v1 import schemas
+from api.v1.dependencies import get_closing_office_manager_api_client
+from api.v1.schemas import StockBalanceStatistics
+from core import exceptions
 from services.external_dodo_api import OfficeManagerAPI
 from services.http_client_factories import HTTPClient
-from v1 import exceptions
-from v1.endpoints import schemas
-from v1.endpoints import get_closing_office_manager_api_client
-from v1.models import StockBalanceStatistics
 
 router = APIRouter(prefix='/stocks', tags=['Stocks'])
 
@@ -16,7 +17,7 @@ router = APIRouter(prefix='/stocks', tags=['Stocks'])
     path='/',
 )
 async def get_ingredient_stocks(
-        unit_ids: schemas.UnitIDs = Query(),
+        unit_ids: common_schemas.UnitIDs = Query(),
         days_left_threshold: int = Query(),
         closing_office_manager_api_client: HTTPClient = Depends(get_closing_office_manager_api_client),
 ) -> schemas.StockBalanceStatistics:

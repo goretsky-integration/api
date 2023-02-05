@@ -3,12 +3,12 @@ import uuid
 
 from pydantic import validator, BaseModel
 
-from v1.models.stop_sales import get_or_none
-
 __all__ = (
     'OrderPartial',
     'OrderByUUID',
 )
+
+from models.validators import get_or_none
 
 
 class OrderPartial(BaseModel):

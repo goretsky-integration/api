@@ -6,30 +6,40 @@ from typing import Iterable
 from fastapi import APIRouter, Depends, Query
 from fastapi_cache.decorator import cache
 
+from api import common_schemas
+from api.v2 import schemas
+from api.v2.dependencies import get_closing_dodo_is_api_client
+from api.v2.schemas import UnitBeingLateCertificatesTodayAndWeekBefore
+from models.domain.delivery import UnitDeliverySpeedStatistics, UnitDeliveryProductivityStatistics
+from models.domain.production import UnitProductivityBalanceStatistics, UnitHeatedShelfTimeStatistics
+from models.external_api_responses.dodo_is_api import (
+    UnitProductivityStatistics,
+    UnitDeliveryStatistics,
+    StopSaleBySalesChannels, SalesChannel,
+)
+from models.external_api_responses.dodo_is_api.production import ChannelStopType
+from services.domain.delivery import (
+    delivery_statistics_to_delivery_speed,
+    to_today_and_week_before_delivery_productivity,
+    count_late_delivery_vouchers,
+)
+from services.domain.production import (
+    remove_duplicated_orders,
+    group_by_unit_uuids,
+    orders_to_restaurant_cooking_time_dto,
+)
 from services.external_dodo_api import DodoISAPI
 from services.http_client_factories import HTTPClient
 from services.periods import Period
-from v2 import models
-from api.v2 import schemas
-from api.v2.dependencies import get_closing_dodo_is_api_client
-from v2.models import (
-    UnitBeingLateCertificatesTodayAndWeekBefore,
-    UnitDeliveryProductivityStatistics,
-    SalesChannel,
-)
-from v2.models.stop_sales import ChannelStopType
-from v2.services import production_statistics, delivery_statistics
-from v2.services.delivery import count_late_delivery_vouchers
-from v2.services.production_statistics import remove_duplicated_orders
 
 router = APIRouter(prefix='/v2/{country_code}/reports', tags=['Reports'])
 
 
 def zip_by_unit_uuid(
         unit_uuids: Iterable[uuid.UUID],
-        productivity_statistics: Iterable[models.UnitProductivityStatistics],
-        delivery_statistics: Iterable[models.UnitDeliveryStatistics],
-        stop_sales: Iterable[models.StopSaleBySalesChannels],
+        productivity_statistics: Iterable[UnitProductivityStatistics],
+        delivery_statistics: Iterable[UnitDeliveryStatistics],
+        stop_sales: Iterable[StopSaleBySalesChannels],
 ) -> list[dict]:
     unit_uuid_to_productivity_statistics = {unit.unit_uuid: unit for unit in productivity_statistics}
     unit_uuid_to_delivery_statistics = {unit.unit_uuid: unit for unit in delivery_statistics}
@@ -50,7 +60,7 @@ def zip_by_unit_uuid(
 )
 @cache(expire=60, namespace='productivity-balance')
 async def get_productivity_balance_statistics(
-        unit_uuids: schemas.UnitUUIDs = Query(),
+        unit_uuids: common_schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
 ) -> Iterable[schemas.UnitProductivityBalanceStatistics]:
     period = Period.today()
@@ -87,7 +97,7 @@ async def get_productivity_balance_statistics(
                     ended_at = period.end
                 stop_duration = ended_at - stop_sale.started_at
                 stop_sale_duration_in_seconds += stop_duration.total_seconds()
-        response.append(models.UnitProductivityBalanceStatistics(
+        response.append(UnitProductivityBalanceStatistics(
             unit_uuid=unit_uuid,
             sales_per_labor_hour=sales_per_labor_hour,
             orders_per_labor_hour=orders_per_labor_hour,
@@ -101,7 +111,7 @@ async def get_productivity_balance_statistics(
 )
 @cache(expire=60, namespace='restaurant-cooking-time')
 async def get_restaurant_cooking_time_statistics(
-        unit_uuids: schemas.UnitUUIDs = Query(),
+        unit_uuids: common_schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
 ) -> Iterable[schemas.UnitRestaurantCookingTimeStatistics]:
     period = Period.today()
@@ -109,8 +119,8 @@ async def get_restaurant_cooking_time_statistics(
         api = DodoISAPI(client)
         orders = await api.get_orders_handover_time_statistics(period, unit_uuids)
     unique_orders = remove_duplicated_orders(orders)
-    unit_uuid_to_orders = production_statistics.group_by_unit_uuids(unique_orders)
-    return [production_statistics.orders_to_restaurant_cooking_time_dto(unit_uuid, unit_uuid_to_orders[unit_uuid])
+    unit_uuid_to_orders = group_by_unit_uuids(unique_orders)
+    return [orders_to_restaurant_cooking_time_dto(unit_uuid, unit_uuid_to_orders[unit_uuid])
             for unit_uuid in unit_uuids]
 
 
@@ -119,7 +129,7 @@ async def get_restaurant_cooking_time_statistics(
 )
 @cache(expire=60, namespace='heated-shelf-time')
 async def get_heated_shelf_time_statistics(
-        unit_uuids: schemas.UnitUUIDs = Query(),
+        unit_uuids: common_schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
 ) -> Iterable[schemas.UnitHeatedShelfTimeStatistics]:
     period = Period.today()
@@ -127,7 +137,7 @@ async def get_heated_shelf_time_statistics(
         api = DodoISAPI(client)
         production_productivity_statistics = await api.get_production_productivity_statistics(period, unit_uuids)
     return [
-        models.UnitHeatedShelfTimeStatistics(
+        UnitHeatedShelfTimeStatistics(
             unit_uuid=unit.unit_uuid,
             average_heated_shelf_time=unit.avg_heated_shelf_time,
         ) for unit in production_productivity_statistics
@@ -139,7 +149,7 @@ async def get_heated_shelf_time_statistics(
 )
 @cache(expire=60, namespace='delivery-speed')
 async def get_delivery_speed_statistics(
-        unit_uuids: schemas.UnitUUIDs = Query(),
+        unit_uuids: common_schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
 ) -> Iterable[schemas.UnitDeliverySpeedStatistics]:
     period = Period.today()
@@ -148,9 +158,9 @@ async def get_delivery_speed_statistics(
         units_delivery_statistics = await api.get_delivery_statistics(period, unit_uuids)
     unit_uuids_from_api = {unit.unit_uuid for unit in units_delivery_statistics}
     unit_uuids_not_from_api = unit_uuids - unit_uuids_from_api
-    empty_delivery_statistics = [models.UnitDeliverySpeedStatistics(unit_uuid=unit_uuid) for unit_uuid in
+    empty_delivery_statistics = [UnitDeliverySpeedStatistics(unit_uuid=unit_uuid) for unit_uuid in
                                  unit_uuids_not_from_api]
-    return [delivery_statistics.delivery_statistics_to_delivery_speed(unit_delivery_statistics)
+    return [delivery_statistics_to_delivery_speed(unit_delivery_statistics)
             for unit_delivery_statistics in units_delivery_statistics] + empty_delivery_statistics
 
 
@@ -159,7 +169,7 @@ async def get_delivery_speed_statistics(
 )
 @cache(expire=60, namespace='delivery-productivity')
 async def get_delivery_productivity_statistics(
-        unit_uuids: schemas.UnitUUIDs = Query(),
+        unit_uuids: common_schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
 ) -> Iterable[schemas.UnitDeliveryProductivityStatistics]:
     today_period = Period.today()
@@ -180,7 +190,7 @@ async def get_delivery_productivity_statistics(
         except KeyError:
             response.append(UnitDeliveryProductivityStatistics(unit_uuid=unit_uuid))
         else:
-            response.append(delivery_statistics.to_today_and_week_before_delivery_productivity(
+            response.append(to_today_and_week_before_delivery_productivity(
                 unit_uuid,
                 unit_today_delivery_statistics,
                 unit_week_delivery_statistics,
@@ -193,7 +203,7 @@ async def get_delivery_productivity_statistics(
 )
 @cache(expire=60, namespace='being-late-certificates')
 async def get_being_late_certificates_for_today_and_week_before(
-        unit_uuids: schemas.UnitUUIDs = Query(),
+        unit_uuids: common_schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
 ) -> Iterable[schemas.UnitBeingLateCertificatesTodayAndWeekBefore]:
     today, week_before = Period.today(), Period.week_before()

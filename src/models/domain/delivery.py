@@ -5,8 +5,6 @@ __all__ = (
     'UnitDeliveryProductivityStatistics',
     'UnitDeliverySpeedStatistics',
     'UnitLateDeliveryVouchers',
-    'DeliveryPartialStatisticsReport',
-    'UnitDeliveryPartialStatistics',
 )
 
 
@@ -32,17 +30,3 @@ class UnitLateDeliveryVouchers:
     unit_uuid: UUID
     certificates_count_today: int
     certificates_count_week_before: int
-
-
-@dataclass(frozen=True, slots=True)
-class UnitDeliveryPartialStatistics:
-    unit_id: int
-    heated_shelf_orders_count: int
-    couriers_in_queue_count: int
-    couriers_on_shift_count: int
-
-
-@dataclass(frozen=True, slots=True)
-class DeliveryPartialStatisticsReport:
-    results: list[UnitDeliveryPartialStatistics]
-    errors: list[int]

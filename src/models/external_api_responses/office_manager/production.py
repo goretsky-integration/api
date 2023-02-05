@@ -1,19 +1,20 @@
 import datetime
+from dataclasses import dataclass
 from typing import TypeVar
 
 from pydantic import validator, BaseModel
+
+from models.validators import get_or_none
 
 __all__ = (
     'StopSale',
     'StopSaleByStreet',
     'StopSaleBySector',
+    'UnitKitchenPartialStatistics',
+    'KitchenPartialStatisticsReport'
 )
 
 T = TypeVar('T')
-
-
-def get_or_none(value: T) -> T | None:
-    return value or None
 
 
 class StopSale(BaseModel):
@@ -45,3 +46,16 @@ class StopSaleBySector(StopSale):
         if isinstance(value, str):
             return datetime.datetime.strptime(value, '%d.%m.%Y %H:%M')
         return value
+
+
+class UnitKitchenPartialStatistics(BaseModel):
+    unit_id: int
+    sales_per_labor_hour_today: int
+    from_week_before_percent: int
+    total_cooking_time: int
+
+
+@dataclass(frozen=True, slots=True)
+class KitchenPartialStatisticsReport:
+    results: list[UnitKitchenPartialStatistics]
+    errors: list[int]

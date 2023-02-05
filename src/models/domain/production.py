@@ -28,17 +28,3 @@ class UnitRestaurantCookingTimeStatistics:
 class UnitHeatedShelfTimeStatistics:
     unit_uuid: UUID
     average_heated_shelf_time: int = 0
-
-
-@dataclass(frozen=True, slots=True)
-class UnitKitchenPartialStatistics:
-    unit_id: int
-    sales_per_labor_hour_today: int
-    from_week_before_percent: int
-    total_cooking_time: int
-
-
-@dataclass(frozen=True, slots=True)
-class KitchenPartialStatisticsReport:
-    results: list[UnitKitchenPartialStatistics]
-    errors: list[int]

@@ -4,7 +4,8 @@ from uuid import UUID
 
 from pydantic import parse_obj_as
 
-from v2 import models, exceptions
+from core import exceptions
+from models.external_api_responses import dodo_is_api as models
 from services.periods import Period, round_to_hours
 from services.http_client_factories import HTTPClient
 
