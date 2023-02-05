@@ -2,7 +2,8 @@ from typing import AsyncGenerator
 from uuid import UUID
 
 from services.http_client_factories import HTTPClient
-from v1 import parsers, models
+from v1 import models
+from services import parsers
 from services.periods import Period
 
 __all__ = ('ShiftManagerAPI',)

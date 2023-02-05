@@ -3,6 +3,7 @@ from fastapi import HTTPException, status
 __all__ = (
     'BadRequest',
     'Unauthorized',
+    'UnitIDAPIError',
 )
 
 
@@ -22,3 +23,9 @@ class Unauthorized(HTTPException):
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail='Unauthorized',
         )
+
+
+class UnitIDAPIError(Exception):
+
+    def __init__(self, unit_id: int):
+        self.unit_id = unit_id

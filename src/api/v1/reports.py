@@ -26,7 +26,7 @@ from v1.models import (
     UnitBonusSystemStatistics,
     UnitIdsAndNamesIn,
 )
-from v1.parsers import DeliveryStatisticsExcelParser
+from services.parsers import DeliveryStatisticsExcelParser
 from v1.services.operational_statistics import calculate_units_revenue, calculate_total_revenue
 
 router = APIRouter(prefix='/v1/{country_code}/reports', tags=['Reports'])
