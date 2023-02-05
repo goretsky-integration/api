@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "dodo__api"
+name = "Goretsky Integration API Facade"
 version = "0.1.0"
 description = ""
 authors = ["usbtypec1 <eldos.baktybekov@gmail.com>"]
