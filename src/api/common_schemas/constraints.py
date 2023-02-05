@@ -1,4 +1,4 @@
-from enum import StrEnum, auto
+from enum import Enum
 from typing import TypeAlias
 from uuid import UUID
 
@@ -12,26 +12,26 @@ __all__ = (
 )
 
 
-class CountryCode(StrEnum):
-    RU = auto()
-    BY = auto()
-    CN = auto()
-    CZ = auto()
-    DE = auto()
-    EE = auto()
-    FI = auto()
-    GB = auto()
-    KG = auto()
-    KZ = auto()
-    LT = auto()
-    NG = auto()
-    PL = auto()
-    RO = auto()
-    SI = auto()
-    SK = auto()
-    TJ = auto()
-    UZ = auto()
-    VN = auto()
+class CountryCode(Enum):
+    RU = 'ru'
+    BY = 'by'
+    CN = 'cn'
+    CZ = 'cz'
+    DE = 'de'
+    EE = 'ee'
+    FI = 'fi'
+    GB = 'gb'
+    KG = 'kg'
+    KZ = 'kz'
+    LT = 'lt'
+    NG = 'ng'
+    PL = 'pl'
+    RO = 'ro'
+    SI = 'si'
+    SK = 'sk'
+    TJ = 'tj'
+    UZ = 'uz'
+    VN = 'vn'
 
 
 class UnitIdAndNameIn(BaseModel):
