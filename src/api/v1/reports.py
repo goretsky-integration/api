@@ -1,10 +1,13 @@
 import asyncio
 import tempfile
-from typing import Iterable
 
 from fastapi import APIRouter, Query, Body, Depends
 from fastapi_cache.decorator import cache
 
+from api import common_schemas
+from api.v1 import schemas
+from api.v1.dependencies import get_closing_public_api_client, get_closing_office_manager_api_client
+from core import exceptions
 from models.domain.sales import RevenueStatisticsReport, UnitsRevenueStatistics, UnitBonusSystemStatistics
 from models.external_api_responses.office_manager import UnitDeliveryPartialStatistics, KitchenPartialStatisticsReport, \
     UnitKitchenPartialStatistics
@@ -15,13 +18,9 @@ from services.external_dodo_api import (
     OfficeManagerAPI,
     get_operational_statistics_for_today_and_week_before_batch,
 )
-from api import common_schemas
 from services.http_client_factories import HTTPClient
-from services.periods import Period
-from core import exceptions
-from api.v1 import schemas
-from api.v1.dependencies import get_closing_public_api_client, get_closing_office_manager_api_client
 from services.parsers import DeliveryStatisticsExcelParser
+from services.periods import Period
 
 router = APIRouter(prefix='/v1/{country_code}/reports', tags=['Reports'])
 
@@ -87,7 +86,7 @@ async def get_kitchen_partial_statistics(
 async def get_bonus_system_statistics(
         unit_ids_and_names: common_schemas.UnitIDsAndNames = Body(),
         closing_office_manager_api_client: HTTPClient = Depends(get_closing_office_manager_api_client),
-) -> Iterable[schemas.UnitBonusSystemStatistics]:
+) -> list[schemas.UnitBonusSystemStatistics]:
     period = Period.today()
     unit_ids = {unit.id for unit in unit_ids_and_names}
     async with closing_office_manager_api_client as client:
@@ -122,7 +121,7 @@ async def get_bonus_system_statistics(
 async def on_get_trips_with_one_order(
         unit_ids: common_schemas.UnitIDs = Query(),
         closing_office_manager_api_client: HTTPClient = Depends(get_closing_office_manager_api_client),
-) -> Iterable[schemas.TripsWithOneOrder]:
+) -> list[schemas.TripsWithOneOrder]:
     period = Period.today()
     async with closing_office_manager_api_client as client:
         api = OfficeManagerAPI(client)

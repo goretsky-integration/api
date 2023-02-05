@@ -21,13 +21,13 @@ def get_or_none(value: T) -> T | None:
     return value or None
 
 
-class SalesChannel(enum.Enum):
+class SalesChannel(str, enum.Enum):
     DINE_IN = 'Dine-in'
     TAKEAWAY = 'Takeaway'
     DELIVERY = 'Delivery'
 
 
-class ChannelStopType(enum.Enum):
+class ChannelStopType(str, enum.Enum):
     COMPLETE = 'Complete'
     REDIRECTION = 'Redirection'
 

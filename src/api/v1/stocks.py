@@ -10,11 +10,11 @@ from core import exceptions
 from services.external_dodo_api import OfficeManagerAPI
 from services.http_client_factories import HTTPClient
 
-router = APIRouter(prefix='/stocks', tags=['Stocks'])
+router = APIRouter(prefix='/v1/{country_code}', tags=['Stocks'])
 
 
 @router.get(
-    path='/',
+    path='/stocks',
 )
 async def get_ingredient_stocks(
         unit_ids: common_schemas.UnitIDs = Query(),

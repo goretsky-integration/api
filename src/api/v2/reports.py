@@ -62,7 +62,7 @@ def zip_by_unit_uuid(
 async def get_productivity_balance_statistics(
         unit_uuids: common_schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
-) -> Iterable[schemas.UnitProductivityBalanceStatistics]:
+) -> list[schemas.UnitProductivityBalanceStatistics]:
     period = Period.today()
     async with closing_dodo_is_api_client as client:
         api = DodoISAPI(client)
@@ -113,7 +113,7 @@ async def get_productivity_balance_statistics(
 async def get_restaurant_cooking_time_statistics(
         unit_uuids: common_schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
-) -> Iterable[schemas.UnitRestaurantCookingTimeStatistics]:
+) -> list[schemas.UnitRestaurantCookingTimeStatistics]:
     period = Period.today()
     async with closing_dodo_is_api_client as client:
         api = DodoISAPI(client)
@@ -131,7 +131,7 @@ async def get_restaurant_cooking_time_statistics(
 async def get_heated_shelf_time_statistics(
         unit_uuids: common_schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
-) -> Iterable[schemas.UnitHeatedShelfTimeStatistics]:
+) -> list[schemas.UnitHeatedShelfTimeStatistics]:
     period = Period.today()
     async with closing_dodo_is_api_client as client:
         api = DodoISAPI(client)
@@ -151,7 +151,7 @@ async def get_heated_shelf_time_statistics(
 async def get_delivery_speed_statistics(
         unit_uuids: common_schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
-) -> Iterable[schemas.UnitDeliverySpeedStatistics]:
+) -> list[schemas.UnitDeliverySpeedStatistics]:
     period = Period.today()
     async with closing_dodo_is_api_client as client:
         api = DodoISAPI(client)
@@ -171,7 +171,7 @@ async def get_delivery_speed_statistics(
 async def get_delivery_productivity_statistics(
         unit_uuids: common_schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
-) -> Iterable[schemas.UnitDeliveryProductivityStatistics]:
+) -> list[schemas.UnitDeliveryProductivityStatistics]:
     today_period = Period.today()
     week_before_period = Period.week_before_to_this_time()
     async with closing_dodo_is_api_client as client:
@@ -205,7 +205,7 @@ async def get_delivery_productivity_statistics(
 async def get_being_late_certificates_for_today_and_week_before(
         unit_uuids: common_schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
-) -> Iterable[schemas.UnitBeingLateCertificatesTodayAndWeekBefore]:
+) -> list[schemas.UnitBeingLateCertificatesTodayAndWeekBefore]:
     today, week_before = Period.today(), Period.week_before()
     async with closing_dodo_is_api_client as client:
         api = DodoISAPI(client)

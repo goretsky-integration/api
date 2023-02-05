@@ -1,5 +1,3 @@
-from typing import Iterable
-
 from fastapi import APIRouter, Depends, Query
 
 from api import common_schemas
@@ -20,7 +18,7 @@ async def get_stop_sales_by_sales_channels(
         unit_uuids: common_schemas.UnitUUIDs = Query(),
         period: Period = Depends(Period),
         closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
-) -> Iterable[schemas.StopSaleBySalesChannels]:
+) -> tuple[schemas.StopSaleBySalesChannels, ...]:
     async with closing_dodo_is_api_client as client:
         api = DodoISAPI(client)
         return await api.get_stop_sales_by_sales_channels(period, unit_uuids)
@@ -34,7 +32,7 @@ async def get_stop_sales_by_ingredients(
         unit_uuids: common_schemas.UnitUUIDs = Query(),
         period: Period = Depends(Period),
         closing_dodo_is_api_client: HTTPClient = Depends(get_closing_dodo_is_api_client),
-) -> Iterable[schemas.StopSaleByIngredients]:
+) -> tuple[schemas.StopSaleByIngredients, ...]:
     async with closing_dodo_is_api_client as client:
         api = DodoISAPI(client)
         return await api.get_stop_sales_by_ingredients(period, unit_uuids)
