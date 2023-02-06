@@ -89,16 +89,10 @@ async def get_delivery_speed_statistics(
     async with closing_dodo_is_api_client as client:
         api = DodoISAPI(client)
         units_delivery_statistics = await api.get_delivery_statistics(period, unit_uuids)
-    unit_uuids_from_api = {unit.unit_uuid for unit in units_delivery_statistics}
-    unit_uuids_not_from_api = unit_uuids - unit_uuids_from_api
-    empty_delivery_statistics = [
-        delivery_models.UnitDeliverySpeedStatistics(unit_uuid=unit_uuid)
-        for unit_uuid in unit_uuids_not_from_api
-    ]
-    return [
-        delivery_services.delivery_statistics_to_delivery_speed(unit_delivery_statistics)
-        for unit_delivery_statistics in units_delivery_statistics
-    ] + empty_delivery_statistics
+    return delivery_services.calculate_units_delivery_speed_statistics(
+        all_unit_uuids=unit_uuids,
+        delivery_statistics=units_delivery_statistics,
+    )
 
 
 @router.get(
@@ -109,30 +103,18 @@ async def get_delivery_productivity_statistics(
         unit_uuids: common_schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(dependencies.get_closing_dodo_is_api_client),
 ) -> list[schemas.UnitDeliveryProductivityStatistics]:
-    today_period = Period.today()
-    week_before_period = Period.week_before_to_this_time()
+    today_period, week_before_period = Period.today(), Period.week_before_to_this_time()
     async with closing_dodo_is_api_client as client:
         api = DodoISAPI(client)
-        today_units_delivery_statistics, week_before_units_delivery_statistics = await asyncio.gather(
+        today_delivery_statistics, week_before_delivery_statistics = await asyncio.gather(
             api.get_delivery_statistics(today_period, unit_uuids),
             api.get_delivery_statistics(week_before_period, unit_uuids),
         )
-    unit_uuid_to_today_statistics = {unit.unit_uuid: unit for unit in today_units_delivery_statistics}
-    unit_uuid_to_week_before_statistics = {unit.unit_uuid: unit for unit in week_before_units_delivery_statistics}
-    response = []
-    for unit_uuid in unit_uuids:
-        try:
-            unit_today_delivery_statistics = unit_uuid_to_today_statistics[unit_uuid]
-            unit_week_delivery_statistics = unit_uuid_to_week_before_statistics[unit_uuid]
-        except KeyError:
-            response.append(delivery_models.UnitDeliveryProductivityStatistics(unit_uuid=unit_uuid))
-        else:
-            response.append(delivery_services.to_today_and_week_before_delivery_productivity(
-                unit_uuid,
-                unit_today_delivery_statistics,
-                unit_week_delivery_statistics,
-            ))
-    return response
+    return delivery_services.calculate_delivery_productivity_statistics(
+        unit_uuids=unit_uuids,
+        today_delivery_statistics=today_delivery_statistics,
+        week_before_delivery_statistics=week_before_delivery_statistics,
+    )
 
 
 @router.get(
