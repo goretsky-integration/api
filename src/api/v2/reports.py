@@ -26,7 +26,7 @@ from services.domain.delivery import (
 from services.domain.production import (
     remove_duplicated_orders,
     group_by_unit_uuids,
-    orders_to_restaurant_cooking_time_dto,
+    orders_to_restaurant_cooking_time_dto, calculate_productivity_balance,
 )
 from services.external_dodo_api import DodoISAPI
 from services.http_client_factories import HTTPClient
@@ -66,44 +66,18 @@ async def get_productivity_balance_statistics(
     period = Period.today()
     async with closing_dodo_is_api_client as client:
         api = DodoISAPI(client)
-        productivity_statistics, units_delivery_statistics, stop_sales = await asyncio.gather(
+        productivity_statistics, delivery_statistics, stop_sales = await asyncio.gather(
             api.get_production_productivity_statistics(period, unit_uuids),
             api.get_delivery_statistics(period, unit_uuids),
             api.get_stop_sales_by_sales_channels(period, unit_uuids),
         )
-    unit_uuid_to_productivity_statistics = {unit.unit_uuid: unit for unit in productivity_statistics}
-    unit_uuid_to_delivery_statistics = {unit.unit_uuid: unit for unit in units_delivery_statistics}
-    unit_uuid_to_unit_stop_sales = collections.defaultdict(list)
-    for stop_sale in stop_sales:
-        unit_uuid_to_unit_stop_sales[stop_sale.unit_uuid].append(stop_sale)
-    response = []
-    for unit_uuid in unit_uuids:
-        sales_per_labor_hour = 0
-        orders_per_labor_hour = 0
-        stop_sale_duration_in_seconds = 0
-        if unit_uuid in unit_uuid_to_productivity_statistics:
-            sales_per_labor_hour = unit_uuid_to_productivity_statistics[unit_uuid].sales_per_labor_hour
-        if unit_uuid in unit_uuid_to_delivery_statistics:
-            orders_per_labor_hour = unit_uuid_to_delivery_statistics[unit_uuid].orders_per_labor_hour
-        if unit_uuid in unit_uuid_to_unit_stop_sales:
-            stop_sales = unit_uuid_to_unit_stop_sales[unit_uuid]
-            for stop_sale in stop_sales:
-                if stop_sale.sales_channel_name.name != SalesChannel.DELIVERY.name:
-                    continue
-                if stop_sale.channel_stop_type.name != ChannelStopType.COMPLETE.name:
-                    continue
-                ended_at = stop_sale.ended_at
-                if stop_sale.ended_at is None:
-                    ended_at = period.end
-                stop_duration = ended_at - stop_sale.started_at
-                stop_sale_duration_in_seconds += stop_duration.total_seconds()
-        response.append(UnitProductivityBalanceStatistics(
-            unit_uuid=unit_uuid,
-            sales_per_labor_hour=sales_per_labor_hour,
-            orders_per_labor_hour=orders_per_labor_hour,
-            stop_sale_duration_in_seconds=stop_sale_duration_in_seconds,
-        ))
-    return response
+    return calculate_productivity_balance(
+        unit_uuids=unit_uuids,
+        productivity_statistics=productivity_statistics,
+        delivery_statistics=delivery_statistics,
+        stop_sales=stop_sales,
+        now=period.end,
+    )
 
 
 @router.get(

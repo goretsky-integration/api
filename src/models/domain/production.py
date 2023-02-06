@@ -5,8 +5,6 @@ __all__ = (
     'UnitProductivityBalanceStatistics',
     'UnitRestaurantCookingTimeStatistics',
     'UnitHeatedShelfTimeStatistics',
-    'UnitKitchenPartialStatistics',
-    'KitchenPartialStatisticsReport',
 )
 
 
