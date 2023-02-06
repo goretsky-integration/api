@@ -4,20 +4,12 @@ import statistics
 from typing import Iterable, TypeVar, DefaultDict, Generator
 from uuid import UUID
 
-from models.external_api_responses.dodo_is_api import production as dodo_is_api_production_models
-from models.external_api_responses.dodo_is_api import delivery as dodo_is_api_delivery_models
 from models.domain import production as production_models
+from models.external_api_responses.dodo_is_api import delivery as dodo_is_api_delivery_models
+from models.external_api_responses.dodo_is_api import production as dodo_is_api_production_models
 
 T = TypeVar('T')
 SSv2 = TypeVar('SSv2', bound=dodo_is_api_production_models.StopSale)
-
-
-def remove_duplicated_orders(
-        orders: Iterable[dodo_is_api_production_models.OrdersHandoverTime]
-) -> tuple[dodo_is_api_production_models.OrdersHandoverTime, ...]:
-    unique_orders: dict[UUID, dodo_is_api_production_models.OrdersHandoverTime] = {order.order_id: order for order in
-                                                                                   orders}
-    return tuple(unique_orders.values())
 
 
 def group_by_unit_uuids(items: Iterable[T]) -> DefaultDict[UUID, list[T]]:
@@ -48,10 +40,7 @@ def orders_to_restaurant_cooking_time_dto(
         unit_uuid: UUID,
         orders: Iterable[dodo_is_api_production_models.OrdersHandoverTime],
 ) -> production_models.UnitRestaurantCookingTimeStatistics:
-    return production_models.UnitRestaurantCookingTimeStatistics(
-        unit_uuid=unit_uuid,
-        average_tracking_pending_and_cooking_time=calculate_average_tracking_pending_and_cooking_time(orders)
-    )
+    return
 
 
 def calculate_unit_total_stop_duration(
@@ -119,5 +108,20 @@ def calculate_productivity_balance(
             unit_uuid_to_productivity_statistics=unit_uuid_to_productivity_statistics,
             unit_uuid_to_delivery_statistics=unit_uuid_to_delivery_statistics,
             now=now
+        ) for unit_uuid in unit_uuids
+    ]
+
+
+def calculate_restaurant_cooking_time(
+        unit_uuids: Iterable[UUID],
+        orders: Iterable[dodo_is_api_production_models.OrdersHandoverTime]
+):
+    orders_grouped_by_unit_uuid = group_by_unit_uuids(orders)
+    return [
+        production_models.UnitRestaurantCookingTimeStatistics(
+            unit_uuid=unit_uuid,
+            average_tracking_pending_and_cooking_time=calculate_average_tracking_pending_and_cooking_time(
+                orders=orders_grouped_by_unit_uuid[unit_uuid]
+            )
         ) for unit_uuid in unit_uuids
     ]

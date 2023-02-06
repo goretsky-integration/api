@@ -1,5 +1,4 @@
 import asyncio
-import collections
 import uuid
 from typing import Iterable
 
@@ -11,22 +10,19 @@ from api.v2 import schemas
 from api.v2.dependencies import get_closing_dodo_is_api_client
 from api.v2.schemas import UnitBeingLateCertificatesTodayAndWeekBefore
 from models.domain.delivery import UnitDeliverySpeedStatistics, UnitDeliveryProductivityStatistics
-from models.domain.production import UnitProductivityBalanceStatistics, UnitHeatedShelfTimeStatistics
+from models.domain.production import UnitHeatedShelfTimeStatistics
 from models.external_api_responses.dodo_is_api import (
     UnitProductivityStatistics,
     UnitDeliveryStatistics,
-    StopSaleBySalesChannels, SalesChannel,
+    StopSaleBySalesChannels,
 )
-from models.external_api_responses.dodo_is_api.production import ChannelStopType
 from services.domain.delivery import (
     delivery_statistics_to_delivery_speed,
     to_today_and_week_before_delivery_productivity,
     count_late_delivery_vouchers,
 )
 from services.domain.production import (
-    remove_duplicated_orders,
-    group_by_unit_uuids,
-    orders_to_restaurant_cooking_time_dto, calculate_productivity_balance,
+    calculate_productivity_balance, calculate_restaurant_cooking_time,
 )
 from services.external_dodo_api import DodoISAPI
 from services.http_client_factories import HTTPClient
@@ -92,10 +88,7 @@ async def get_restaurant_cooking_time_statistics(
     async with closing_dodo_is_api_client as client:
         api = DodoISAPI(client)
         orders = await api.get_orders_handover_time_statistics(period, unit_uuids)
-    unique_orders = remove_duplicated_orders(orders)
-    unit_uuid_to_orders = group_by_unit_uuids(unique_orders)
-    return [orders_to_restaurant_cooking_time_dto(unit_uuid, unit_uuid_to_orders[unit_uuid])
-            for unit_uuid in unit_uuids]
+    return calculate_restaurant_cooking_time(unit_uuids, orders)
 
 
 @router.get(
