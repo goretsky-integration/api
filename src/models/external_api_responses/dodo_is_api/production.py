@@ -42,6 +42,10 @@ class StopSale(BaseModel):
     stopped_by_user_id: UUID = Field(alias='stoppedByUserId')
     resumed_by_user_id: UUID | None = Field(alias='resumedByUserId')
 
+    @property
+    def is_resumed(self) -> bool:
+        return self.ended_at is not None
+
     class Meta:
         use_enum_values = True
 
