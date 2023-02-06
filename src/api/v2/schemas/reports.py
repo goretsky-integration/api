@@ -6,7 +6,7 @@ __all__ = (
     'UnitProductivityBalanceStatistics',
     'UnitRestaurantCookingTimeStatistics',
     'UnitHeatedShelfTimeStatistics',
-    'UnitLateDeliveryVouchers',
+    'UnitLateDeliveryVouchersTodayAndWeekBefore',
     'UnitDeliveryProductivityStatistics',
     'UnitDeliverySpeedStatistics',
 )

@@ -36,13 +36,6 @@ def calculate_average_tracking_pending_and_cooking_time(
     return average_tracking_pending_and_cooking_time
 
 
-def orders_to_restaurant_cooking_time_dto(
-        unit_uuid: UUID,
-        orders: Iterable[dodo_is_api_production_models.OrdersHandoverTime],
-) -> production_models.UnitRestaurantCookingTimeStatistics:
-    return
-
-
 def calculate_unit_total_stop_duration(
         stop_sales: Iterable[SSv2],
         now: datetime.datetime
@@ -96,7 +89,7 @@ def calculate_productivity_balance(
         delivery_statistics,
         stop_sales: Iterable[dodo_is_api_production_models.StopSaleBySalesChannels],
         now: datetime.datetime,
-):
+) -> list[production_models.UnitProductivityBalanceStatistics]:
     complete_delivery_stop_sales = filter_complete_delivery_stop_sales(stop_sales)
     stop_sales_grouped_by_unit_uuid = group_by_unit_uuids(complete_delivery_stop_sales)
     unit_uuid_to_productivity_statistics = {unit.unit_uuid: unit for unit in productivity_statistics}
@@ -115,7 +108,7 @@ def calculate_productivity_balance(
 def calculate_restaurant_cooking_time(
         unit_uuids: Iterable[UUID],
         orders: Iterable[dodo_is_api_production_models.OrdersHandoverTime]
-):
+) -> list[production_models.UnitRestaurantCookingTimeStatistics]:
     orders_grouped_by_unit_uuid = group_by_unit_uuids(orders)
     return [
         production_models.UnitRestaurantCookingTimeStatistics(
@@ -124,4 +117,26 @@ def calculate_restaurant_cooking_time(
                 orders=orders_grouped_by_unit_uuid[unit_uuid]
             )
         ) for unit_uuid in unit_uuids
+    ]
+
+
+def unit_heated_shelf_time_statistics_factory(
+        *,
+        unit_uuid: UUID,
+        average_heated_shelf_time: int,
+) -> production_models.UnitHeatedShelfTimeStatistics:
+    return production_models.UnitHeatedShelfTimeStatistics(
+        unit_uuid=unit_uuid,
+        average_heated_shelf_time=average_heated_shelf_time,
+    )
+
+
+def calculate_units_heated_shelf_time_statistics(
+        production_productivity_statistics: Iterable[dodo_is_api_production_models.UnitProductivityStatistics],
+) -> list[production_models.UnitHeatedShelfTimeStatistics]:
+    return [
+        unit_heated_shelf_time_statistics_factory(
+            unit_uuid=unit.unit_uuid,
+            average_heated_shelf_time=unit.avg_heated_shelf_time,
+        ) for unit in production_productivity_statistics
     ]

@@ -5,7 +5,6 @@ from fastapi_cache.decorator import cache
 
 from api import common_schemas
 from api.v2 import schemas, dependencies
-from models.domain import production as production_models
 from services.domain import delivery as delivery_services
 from services.domain import production as production_services
 from services.external_dodo_api import DodoISAPI
@@ -67,12 +66,7 @@ async def get_heated_shelf_time_statistics(
     async with closing_dodo_is_api_client as client:
         api = DodoISAPI(client)
         production_productivity_statistics = await api.get_production_productivity_statistics(period, unit_uuids)
-    return [
-        production_models.UnitHeatedShelfTimeStatistics(
-            unit_uuid=unit.unit_uuid,
-            average_heated_shelf_time=unit.avg_heated_shelf_time,
-        ) for unit in production_productivity_statistics
-    ]
+    return production_services.calculate_units_heated_shelf_time_statistics(production_productivity_statistics)
 
 
 @router.get(
@@ -122,7 +116,7 @@ async def get_delivery_productivity_statistics(
 async def get_being_late_certificates_for_today_and_week_before(
         unit_uuids: common_schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(dependencies.get_closing_dodo_is_api_client),
-) -> list[schemas.UnitLateDeliveryVouchers]:
+) -> list[schemas.UnitLateDeliveryVouchersTodayAndWeekBefore]:
     today, week_before = Period.today(), Period.week_before()
     async with closing_dodo_is_api_client as client:
         api = DodoISAPI(client)
