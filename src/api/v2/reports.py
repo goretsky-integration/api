@@ -5,11 +5,9 @@ from fastapi_cache.decorator import cache
 
 from api import common_schemas
 from api.v2 import schemas, dependencies
-from models.domain import delivery as delivery_models
 from models.domain import production as production_models
 from services.domain import delivery as delivery_services
 from services.domain import production as production_services
-from services.domain import sales as sales_services
 from services.external_dodo_api import DodoISAPI
 from services.http_client_factories import HTTPClient
 from services.periods import Period
@@ -110,7 +108,7 @@ async def get_delivery_productivity_statistics(
             api.get_delivery_statistics(today_period, unit_uuids),
             api.get_delivery_statistics(week_before_period, unit_uuids),
         )
-    return delivery_services.calculate_delivery_productivity_statistics(
+    return delivery_services.calculate_units_delivery_productivity_statistics(
         unit_uuids=unit_uuids,
         today_delivery_statistics=today_delivery_statistics,
         week_before_delivery_statistics=week_before_delivery_statistics,
@@ -124,7 +122,7 @@ async def get_delivery_productivity_statistics(
 async def get_being_late_certificates_for_today_and_week_before(
         unit_uuids: common_schemas.UnitUUIDs = Query(),
         closing_dodo_is_api_client: HTTPClient = Depends(dependencies.get_closing_dodo_is_api_client),
-) -> list[schemas.UnitBeingLateCertificatesTodayAndWeekBefore]:
+) -> list[schemas.UnitLateDeliveryVouchers]:
     today, week_before = Period.today(), Period.week_before()
     async with closing_dodo_is_api_client as client:
         api = DodoISAPI(client)
@@ -132,12 +130,8 @@ async def get_being_late_certificates_for_today_and_week_before(
             api.get_late_delivery_vouchers(today, unit_uuids),
             api.get_late_delivery_vouchers(week_before, unit_uuids),
         )
-    today_vouchers_count = delivery_services.count_late_delivery_vouchers(today_vouchers)
-    week_before_vouchers_count = delivery_services.count_late_delivery_vouchers(week_before_vouchers)
-    return [
-        sales_services.UnitBeingLateCertificatesTodayAndWeekBefore(
-            unit_uuid=unit_uuid,
-            certificates_count_today=today_vouchers_count.get(unit_uuid, 0),
-            certificates_count_week_before=week_before_vouchers_count.get(unit_uuid, 0),
-        ) for unit_uuid in unit_uuids
-    ]
+    return delivery_services.calculate_units_late_delivery_vouchers(
+        unit_uuids=unit_uuids,
+        today_vouchers=today_vouchers,
+        week_before_vouchers=week_before_vouchers,
+    )

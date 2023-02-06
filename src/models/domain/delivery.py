@@ -5,6 +5,7 @@ __all__ = (
     'UnitDeliveryProductivityStatistics',
     'UnitDeliverySpeedStatistics',
     'UnitLateDeliveryVouchers',
+    'UnitLateDeliveryVouchersTodayAndWeekBefore',
 )
 
 
@@ -27,6 +28,13 @@ class UnitDeliveryProductivityStatistics:
 
 @dataclass(frozen=True, slots=True)
 class UnitLateDeliveryVouchers:
+    unit_uuid: UUID
+    certificates_count_today: int
+    certificates_count_week_before: int
+
+
+@dataclass(frozen=True, slots=True)
+class UnitLateDeliveryVouchersTodayAndWeekBefore:
     unit_uuid: UUID
     certificates_count_today: int
     certificates_count_week_before: int

@@ -1,5 +1,5 @@
 import collections
-from typing import Iterable
+from typing import Iterable, DefaultDict
 from uuid import UUID
 
 from models.domain import delivery as delivery_models
@@ -12,13 +12,14 @@ __all__ = (
     'delivery_speed_statistics_factory',
     'delivery_productivity_statistics_factory',
     'calculate_units_delivery_speed_statistics',
-    'calculate_delivery_productivity_statistics',
+    'calculate_units_delivery_productivity_statistics',
+    'calculate_units_late_delivery_vouchers',
 )
 
 
 def count_late_delivery_vouchers(
         vouchers: Iterable[dodo_is_api_delivery_models.LateDeliveryVoucher],
-) -> dict[UUID, int]:
+) -> DefaultDict[UUID, int]:
     unit_uuid_to_vouchers_count = collections.defaultdict(int)
     for voucher in vouchers:
         unit_uuid_to_vouchers_count[voucher.unit_uuid] += 1
@@ -82,6 +83,7 @@ def blank_unit_delivery_productivity_statistics_factory(
 
 
 def calculate_units_delivery_speed_statistics(
+        *,
         all_unit_uuids: Iterable[UUID],
         delivery_statistics: Iterable[dodo_is_api_delivery_models.UnitDeliveryStatistics]
 ) -> list[delivery_models.UnitDeliverySpeedStatistics]:
@@ -98,7 +100,8 @@ def calculate_units_delivery_speed_statistics(
     return delivery_speed_statistics + blank_delivery_statistics
 
 
-def calculate_delivery_productivity_statistics(
+def calculate_units_delivery_productivity_statistics(
+        *,
         unit_uuids: Iterable[UUID],
         today_delivery_statistics: Iterable[dodo_is_api_delivery_models.UnitDeliveryStatistics],
         week_before_delivery_statistics: Iterable[dodo_is_api_delivery_models.UnitDeliveryStatistics],
@@ -117,3 +120,20 @@ def calculate_delivery_productivity_statistics(
                 unit_uuid, unit_today_delivery_statistics, unit_week_delivery_statistics,
             ))
     return units_delivery_productivity
+
+
+def calculate_units_late_delivery_vouchers(
+        *,
+        unit_uuids: Iterable[UUID],
+        today_vouchers: Iterable[dodo_is_api_delivery_models.LateDeliveryVoucher],
+        week_before_vouchers: Iterable[dodo_is_api_delivery_models.LateDeliveryVoucher],
+) -> list[delivery_models.UnitLateDeliveryVouchersTodayAndWeekBefore]:
+    today_vouchers_count = count_late_delivery_vouchers(today_vouchers)
+    week_before_vouchers_count = count_late_delivery_vouchers(week_before_vouchers)
+    return [
+        delivery_models.UnitLateDeliveryVouchersTodayAndWeekBefore(
+            unit_uuid=unit_uuid,
+            certificates_count_today=today_vouchers_count.get(unit_uuid, 0),
+            certificates_count_week_before=week_before_vouchers_count.get(unit_uuid, 0),
+        ) for unit_uuid in unit_uuids
+    ]
