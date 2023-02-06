@@ -2,8 +2,12 @@ from fastapi import Request
 
 from api import common_schemas
 from core import config
-from services.http_client_factories import closing_public_api_client_factory, closing_office_manager_api_client_factory, \
-    HTTPClient, closing_shift_manager_api_client_factory
+from services.http_client_factories import (
+    closing_public_api_client_factory,
+    closing_office_manager_api_client_factory,
+    HTTPClient,
+    closing_shift_manager_api_client_factory,
+)
 
 __all__ = (
     'get_closing_public_api_client',

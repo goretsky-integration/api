@@ -3,10 +3,9 @@ import asyncio
 from fastapi import APIRouter, Depends, Query
 
 from api import common_schemas
-from api.v1 import schemas
-from api.v1.dependencies import get_closing_office_manager_api_client
-from api.v1.schemas import StockBalanceStatistics
+from api.v1 import schemas, dependencies
 from core import exceptions
+from models.external_api_responses import office_manager as office_manager_models
 from services.external_dodo_api import OfficeManagerAPI
 from services.http_client_factories import HTTPClient
 
@@ -19,7 +18,7 @@ router = APIRouter(prefix='/v1/{country_code}', tags=['Stocks'])
 async def get_ingredient_stocks(
         unit_ids: common_schemas.UnitIDs = Query(),
         days_left_threshold: int = Query(),
-        closing_office_manager_api_client: HTTPClient = Depends(get_closing_office_manager_api_client),
+        closing_office_manager_api_client: HTTPClient = Depends(dependencies.get_closing_office_manager_api_client),
 ) -> schemas.StockBalanceStatistics:
     async with closing_office_manager_api_client as client:
         api = OfficeManagerAPI(client)
@@ -36,4 +35,4 @@ async def get_ingredient_stocks(
         unit_stocks_balance.unit_id for unit_stocks_balance in units_stocks_balance
         if isinstance(unit_stocks_balance, exceptions.UnitIDAPIError)
     ]
-    return StockBalanceStatistics(units=stocks_balances, error_unit_ids=errors)
+    return office_manager_models.StockBalanceStatistics(units=stocks_balances, error_unit_ids=errors)

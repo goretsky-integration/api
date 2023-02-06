@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from pydantic import BaseModel
 
-__all__ = ('TripsWithOneOrder', 'UnitDeliveryPartialStatistics')
+__all__ = ('TripsWithOneOrder', 'UnitDeliveryPartialStatistics', 'DeliveryPartialStatisticsReport')
 
 
 class TripsWithOneOrder(BaseModel):
