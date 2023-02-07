@@ -30,3 +30,4 @@ class OrderByUUID(BaseModel):
     price: NonNegativeInt
     uuid: UUID
     courier_name: str | None
+    rejected_by_user_name: str | None
