@@ -184,6 +184,14 @@ class OrderByUUIDParser(HTMLParser):
     def parse(self) -> OrderByUUID:
         order_no = self._soup.find('span', id='orderNumber').text
         department = self._soup.find('div', class_='headerDepartment').text
+
+        courier_name = None
+        for tr in self._soup.find('table').find('tbody').find_all('tr'):
+            field_name, field_value = [td.text.strip() for td in tr.find_all('td')]
+            if field_name == 'Курьер:':
+                courier_name = field_value
+                break
+
         history = self._soup.find('div', id='history')
         trs = history.find_all('tr')[1:]
         order_created_at = receipt_printed_at = None
@@ -209,6 +217,7 @@ class OrderByUUIDParser(HTMLParser):
             uuid=self._order_uuid,
             price=self._order_price,
             type=self._order_type,
+            courier_name=courier_name,
         )
 
 
