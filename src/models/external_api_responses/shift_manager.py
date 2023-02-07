@@ -26,6 +26,8 @@ class OrderByUUID(BaseModel):
     type: str
     price: int
     uuid: uuid.UUID
+    courier_name: str | None
+    rejected_by_user_name: str | None
 
     @validator(
         'receipt_printed_at',

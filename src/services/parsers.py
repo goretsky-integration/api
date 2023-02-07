@@ -184,6 +184,16 @@ class OrderByUUIDParser(HTMLParser):
     def parse(self) -> OrderByUUID:
         order_no = self._soup.find('span', id='orderNumber').text
         department = self._soup.find('div', class_='headerDepartment').text
+
+        courier_name: str | None = None
+        for tr in self._soup.find('table').find_all('tr'):
+            if len(tr) != 2:
+                continue
+            field_name, field_value = [td.text.strip() for td in tr.find_all('td')]
+            if field_name == 'Курьер:' and field_value:
+                courier_name = field_value
+                break
+
         history = self._soup.find('div', id='history')
         trs = history.find_all('tr')[1:]
         order_created_at = receipt_printed_at = None
@@ -194,13 +204,18 @@ class OrderByUUIDParser(HTMLParser):
             if 'закрыт чек на возврат' in msg:
                 is_receipt_printed = True
                 break
+
+        rejected_by_user_name: str | None = None
         for tr in trs:
-            dt, msg, _ = tr.find_all('td')
+            dt, msg, user_name = tr.find_all('td')
             msg = msg.text.lower().strip()
             if 'has been accepted' in msg:
                 order_created_at = dt.text
             elif 'закрыт чек на возврат' in msg and is_receipt_printed:
                 receipt_printed_at = dt.text
+            elif 'has been rejected' in msg and user_name.text.strip():
+                rejected_by_user_name = user_name.text.strip()
+
         return OrderByUUID(
             number=order_no,
             unit_name=department,
@@ -209,6 +224,8 @@ class OrderByUUIDParser(HTMLParser):
             uuid=self._order_uuid,
             price=self._order_price,
             type=self._order_type,
+            courier_name=courier_name,
+            rejected_by_user_name=rejected_by_user_name,
         )
 
 
