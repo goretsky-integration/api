@@ -6,7 +6,7 @@ __all__ = (
     'UnitProductivityBalanceStatistics',
     'UnitRestaurantCookingTimeStatistics',
     'UnitHeatedShelfTimeStatistics',
-    'UnitBeingLateCertificatesTodayAndWeekBefore',
+    'UnitLateDeliveryVouchersTodayAndWeekBefore',
     'UnitDeliveryProductivityStatistics',
     'UnitDeliverySpeedStatistics',
 )
@@ -29,7 +29,7 @@ class UnitHeatedShelfTimeStatistics(BaseModel):
     average_heated_shelf_time: NonNegativeInt
 
 
-class UnitBeingLateCertificatesTodayAndWeekBefore(BaseModel):
+class UnitLateDeliveryVouchersTodayAndWeekBefore(BaseModel):
     unit_uuid: UUID
     certificates_count_today: NonNegativeInt
     certificates_count_week_before: NonNegativeInt

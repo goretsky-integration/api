@@ -2,7 +2,7 @@ from typing import AsyncGenerator
 from uuid import UUID
 
 from services.http_client_factories import HTTPClient
-from v1 import models
+from models.external_api_responses import shift_manager as shift_manager_models
 from services import parsers
 from services.periods import Period
 
@@ -14,7 +14,8 @@ class ShiftManagerAPI:
     def __init__(self, client: HTTPClient):
         self.__client = client
 
-    async def get_partial_canceled_orders(self, period: Period) -> AsyncGenerator[list[models.OrderPartial], None]:
+    async def get_partial_canceled_orders(
+            self, period: Period) -> AsyncGenerator[list[shift_manager_models.OrderPartial], None]:
         url = '/Managment/ShiftManagment/PartialShiftOrders'
         request_params = {
             'page': 1,
@@ -34,7 +35,7 @@ class ShiftManagerAPI:
             order_uuid: UUID,
             order_price: int,
             order_type: str,
-    ) -> models.OrderByUUID:
+    ) -> shift_manager_models.OrderByUUID:
         url = '/Managment/ShiftManagment/Order'
         request_params = {'orderUUId': order_uuid.hex}
         response = await self.__client.get(url, params=request_params, timeout=30)

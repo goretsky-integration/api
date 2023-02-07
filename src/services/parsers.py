@@ -9,16 +9,15 @@ from bs4 import BeautifulSoup
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
-from v1 import models
-from v1.models import (
+from models.external_api_responses.office_manager.accounting import StockBalance
+from models.external_api_responses.office_manager import (
     StopSaleBySector,
     StopSaleByStreet,
+    TripsWithOneOrder,
     UnitDeliveryPartialStatistics,
     UnitKitchenPartialStatistics,
-    StockBalance,
-    OrderByUUID,
-    OrderPartial,
 )
+from models.external_api_responses.shift_manager import OrderPartial, OrderByUUID
 
 __all__ = (
     'PartialStatisticsParser',
@@ -235,12 +234,13 @@ class ExcelParser(ABC):
 
 class DeliveryStatisticsExcelParser(ExcelParser):
 
-    def parse(self) -> list[models.TripsWithOneOrder]:
+    def parse(self) -> list[TripsWithOneOrder]:
         rows = self._ws['A7': f'N{self._ws.max_row}']
         result = []
         for row in rows:
             unit_name, *_, trips_with_one_order_percentage = [cell.value for cell in row]
-            trips_with_one_order = models.TripsWithOneOrder(unit_name=unit_name,
-                                                            percentage=round(trips_with_one_order_percentage * 100, 2))
-            result.append(trips_with_one_order)
+            result.append(TripsWithOneOrder(
+                unit_name=unit_name,
+                percentage=round(trips_with_one_order_percentage * 100, 2))
+            )
         return result

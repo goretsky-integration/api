@@ -21,13 +21,13 @@ def get_or_none(value: T) -> T | None:
     return value or None
 
 
-class SalesChannel(enum.Enum):
+class SalesChannel(str, enum.Enum):
     DINE_IN = 'Dine-in'
     TAKEAWAY = 'Takeaway'
     DELIVERY = 'Delivery'
 
 
-class ChannelStopType(enum.Enum):
+class ChannelStopType(str, enum.Enum):
     COMPLETE = 'Complete'
     REDIRECTION = 'Redirection'
 
@@ -41,6 +41,10 @@ class StopSale(BaseModel):
     ended_at: datetime.datetime | None = Field(alias='endedAt')
     stopped_by_user_id: UUID = Field(alias='stoppedByUserId')
     resumed_by_user_id: UUID | None = Field(alias='resumedByUserId')
+
+    @property
+    def is_resumed(self) -> bool:
+        return self.ended_at is not None
 
     class Meta:
         use_enum_values = True
