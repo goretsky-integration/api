@@ -186,7 +186,9 @@ class OrderByUUIDParser(HTMLParser):
         department = self._soup.find('div', class_='headerDepartment').text
 
         courier_name: str | None = None
-        for tr in self._soup.find('table').find('tbody').find_all('tr'):
+        for tr in self._soup.find('table').find_all('tr'):
+            if len(tr) != 2:
+                continue
             field_name, field_value = [td.text.strip() for td in tr.find_all('td')]
             if field_name == 'Курьер:' and field_value:
                 courier_name = field_value
