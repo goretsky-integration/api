@@ -21,6 +21,7 @@ class OrderPartial(BaseModel):
 class OrderByUUID(BaseModel):
     unit_name: str
     created_at: datetime.datetime
+    canceled_at: datetime.datetime
     receipt_printed_at: datetime.datetime | None
     number: str
     type: str
@@ -32,6 +33,7 @@ class OrderByUUID(BaseModel):
     @validator(
         'receipt_printed_at',
         'created_at',
+        'canceled_at',
         pre=True,
     )
     def str_to_datetime(cls, value: str | None) -> datetime.datetime | None:
