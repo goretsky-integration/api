@@ -196,7 +196,7 @@ class OrderByUUIDParser(HTMLParser):
 
         history = self._soup.find('div', id='history')
         trs = history.find_all('tr')[1:]
-        order_created_at = receipt_printed_at = None
+        order_created_at = receipt_printed_at = order_canceled_at = None
         is_receipt_printed = False
         for tr in trs:
             _, msg, _ = tr.find_all('td')
@@ -213,13 +213,16 @@ class OrderByUUIDParser(HTMLParser):
                 order_created_at = dt.text
             elif 'закрыт чек на возврат' in msg and is_receipt_printed:
                 receipt_printed_at = dt.text
-            elif 'has been rejected' in msg and user_name.text.strip():
-                rejected_by_user_name = user_name.text.strip()
+            elif 'has been rejected' in msg:
+                order_canceled_at = dt.text
+                if user_name.text.strip():
+                    rejected_by_user_name = user_name.text.strip()
 
         return OrderByUUID(
             number=order_no,
             unit_name=department,
             created_at=order_created_at,
+            canceled_at=order_canceled_at,
             receipt_printed_at=receipt_printed_at,
             uuid=self._order_uuid,
             price=self._order_price,
