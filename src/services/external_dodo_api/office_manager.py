@@ -101,3 +101,25 @@ class OfficeManagerAPI:
         url = '/Reports/StopSaleStatistic/GetDeliveryUnitStopSaleReport'
         response = await self.__client.post(url, data=request_data)
         return parsers.StreetStopSalesHTMLParser(response.text).parse()
+
+    def get_promo_codes_excel_report(
+            self, period: Period, unit_ids: Iterable[int],
+    ):
+        request_data = {
+            'unitsIds': tuple(unit_ids),
+            'OrderSources': (
+                'Telephone',
+                'Site',
+                'Restaurant',
+                'DefectOrder',
+                'Mobile',
+                'Pizzeria',
+                'Aggregator',
+                'Kiosk',
+            ),
+            'beginDate': period.start.strftime('%d.%m.%Y'),
+            'endDate': period.end.strftime('%d.%m.%Y'),
+            'orderTypes': ('Delivery', 'Pickup', 'Stationary'),
+            'IsAllPromoCode': True,
+            'OnlyComposition': False,
+        }
