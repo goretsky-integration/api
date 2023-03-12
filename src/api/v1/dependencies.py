@@ -6,6 +6,8 @@ from services.http_client_factories import (
     closing_public_api_client_factory,
     closing_office_manager_api_client_factory,
     AsyncHTTPClient,
+    HTTPClient,
+    closing_export_service_api_client_factory,
     closing_shift_manager_api_client_factory,
 )
 
@@ -13,6 +15,7 @@ __all__ = (
     'get_closing_public_api_client',
     'get_closing_office_manager_api_client',
     'get_closing_shift_manager_api_client',
+    'get_closing_export_service_api_client',
 )
 
 
@@ -30,6 +33,14 @@ def get_closing_office_manager_api_client(*, request: Request, country_code: com
 
 def get_closing_shift_manager_api_client(*, request: Request, country_code: common_schemas.CountryCode) -> AsyncHTTPClient:
     return closing_shift_manager_api_client_factory(
+        cookies=request.cookies,
+        country_code=country_code.value,
+        app_user_agent=config.APP_USER_AGENT,
+    )
+
+
+def get_closing_export_service_api_client(*, request: Request, country_code: common_schemas.CountryCode) -> HTTPClient:
+    return closing_export_service_api_client_factory(
         cookies=request.cookies,
         country_code=country_code.value,
         app_user_agent=config.APP_USER_AGENT,
