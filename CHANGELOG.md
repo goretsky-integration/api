@@ -1,3 +1,11 @@
+2023-03-12
+---
+
+### Added
+
+- Used promo-codes endpoint. 
+
+
 2023-01-15
 ---
 
