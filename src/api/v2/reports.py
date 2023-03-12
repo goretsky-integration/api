@@ -8,7 +8,7 @@ from api.v2 import schemas, dependencies
 from services.domain import delivery as delivery_services
 from services.domain import production as production_services
 from services.external_dodo_api import DodoISAPI
-from services.http_client_factories import HTTPClient
+from services.http_client_factories import AsyncHTTPClient
 from services.periods import Period
 
 router = APIRouter(prefix='/v2/{country_code}/reports', tags=['Reports'])
@@ -20,7 +20,7 @@ router = APIRouter(prefix='/v2/{country_code}/reports', tags=['Reports'])
 @cache(expire=60, namespace='productivity-balance')
 async def get_productivity_balance_statistics(
         unit_uuids: common_schemas.UnitUUIDs = Query(),
-        closing_dodo_is_api_client: HTTPClient = Depends(dependencies.get_closing_dodo_is_api_client),
+        closing_dodo_is_api_client: AsyncHTTPClient = Depends(dependencies.get_closing_dodo_is_api_client),
 ) -> list[schemas.UnitProductivityBalanceStatistics]:
     period = Period.today()
     async with closing_dodo_is_api_client as client:
@@ -45,7 +45,7 @@ async def get_productivity_balance_statistics(
 @cache(expire=60, namespace='restaurant-cooking-time')
 async def get_restaurant_cooking_time_statistics(
         unit_uuids: common_schemas.UnitUUIDs = Query(),
-        closing_dodo_is_api_client: HTTPClient = Depends(dependencies.get_closing_dodo_is_api_client),
+        closing_dodo_is_api_client: AsyncHTTPClient = Depends(dependencies.get_closing_dodo_is_api_client),
 ) -> list[schemas.UnitRestaurantCookingTimeStatistics]:
     period = Period.today()
     async with closing_dodo_is_api_client as client:
@@ -60,7 +60,7 @@ async def get_restaurant_cooking_time_statistics(
 @cache(expire=60, namespace='heated-shelf-time')
 async def get_heated_shelf_time_statistics(
         unit_uuids: common_schemas.UnitUUIDs = Query(),
-        closing_dodo_is_api_client: HTTPClient = Depends(dependencies.get_closing_dodo_is_api_client),
+        closing_dodo_is_api_client: AsyncHTTPClient = Depends(dependencies.get_closing_dodo_is_api_client),
 ) -> list[schemas.UnitHeatedShelfTimeStatistics]:
     period = Period.today()
     async with closing_dodo_is_api_client as client:
@@ -75,7 +75,7 @@ async def get_heated_shelf_time_statistics(
 @cache(expire=60, namespace='delivery-speed')
 async def get_delivery_speed_statistics(
         unit_uuids: common_schemas.UnitUUIDs = Query(),
-        closing_dodo_is_api_client: HTTPClient = Depends(dependencies.get_closing_dodo_is_api_client),
+        closing_dodo_is_api_client: AsyncHTTPClient = Depends(dependencies.get_closing_dodo_is_api_client),
 ) -> list[schemas.UnitDeliverySpeedStatistics]:
     period = Period.today()
     async with closing_dodo_is_api_client as client:
@@ -93,7 +93,7 @@ async def get_delivery_speed_statistics(
 @cache(expire=60, namespace='delivery-productivity')
 async def get_delivery_productivity_statistics(
         unit_uuids: common_schemas.UnitUUIDs = Query(),
-        closing_dodo_is_api_client: HTTPClient = Depends(dependencies.get_closing_dodo_is_api_client),
+        closing_dodo_is_api_client: AsyncHTTPClient = Depends(dependencies.get_closing_dodo_is_api_client),
 ) -> list[schemas.UnitDeliveryProductivityStatistics]:
     today_period, week_before_period = Period.today(), Period.week_before_to_this_time()
     async with closing_dodo_is_api_client as client:
@@ -115,7 +115,7 @@ async def get_delivery_productivity_statistics(
 @cache(expire=60, namespace='being-late-certificates')
 async def get_being_late_certificates_for_today_and_week_before(
         unit_uuids: common_schemas.UnitUUIDs = Query(),
-        closing_dodo_is_api_client: HTTPClient = Depends(dependencies.get_closing_dodo_is_api_client),
+        closing_dodo_is_api_client: AsyncHTTPClient = Depends(dependencies.get_closing_dodo_is_api_client),
 ) -> list[schemas.UnitLateDeliveryVouchersTodayAndWeekBefore]:
     today, week_before = Period.today(), Period.week_before()
     async with closing_dodo_is_api_client as client:

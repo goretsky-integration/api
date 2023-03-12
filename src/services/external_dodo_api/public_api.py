@@ -4,14 +4,14 @@ from typing import Iterable
 
 from core import exceptions
 from models.external_api_responses import public_api as publib_api_models
-from services.http_client_factories import HTTPClient
+from services.http_client_factories import AsyncHTTPClient
 
 __all__ = ('DodoPublicAPI', 'get_operational_statistics_for_today_and_week_before_batch')
 
 
 class DodoPublicAPI:
 
-    def __init__(self, client: HTTPClient):
+    def __init__(self, client: AsyncHTTPClient):
         self.__client = client
 
     async def get_operational_statistics_for_today_and_week_before(

@@ -6,7 +6,7 @@ from pandas.core.groupby import DataFrameGroupBy
 from core import exceptions
 from models.external_api_responses import office_manager as office_manager_models
 from services import parsers
-from services.http_client_factories import HTTPClient
+from services.http_client_factories import AsyncHTTPClient
 from services.periods import Period
 
 __all__ = ('OfficeManagerAPI',)
@@ -14,7 +14,7 @@ __all__ = ('OfficeManagerAPI',)
 
 class OfficeManagerAPI:
 
-    def __init__(self, client: HTTPClient):
+    def __init__(self, client: AsyncHTTPClient):
         self.__client = client
 
     async def get_delivery_partial_statistics(
@@ -101,25 +101,3 @@ class OfficeManagerAPI:
         url = '/Reports/StopSaleStatistic/GetDeliveryUnitStopSaleReport'
         response = await self.__client.post(url, data=request_data)
         return parsers.StreetStopSalesHTMLParser(response.text).parse()
-
-    def get_promo_codes_excel_report(
-            self, period: Period, unit_ids: Iterable[int],
-    ):
-        request_data = {
-            'unitsIds': tuple(unit_ids),
-            'OrderSources': (
-                'Telephone',
-                'Site',
-                'Restaurant',
-                'DefectOrder',
-                'Mobile',
-                'Pizzeria',
-                'Aggregator',
-                'Kiosk',
-            ),
-            'beginDate': period.start.strftime('%d.%m.%Y'),
-            'endDate': period.end.strftime('%d.%m.%Y'),
-            'orderTypes': ('Delivery', 'Pickup', 'Stationary'),
-            'IsAllPromoCode': True,
-            'OnlyComposition': False,
-        }
