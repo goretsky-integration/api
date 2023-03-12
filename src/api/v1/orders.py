@@ -6,7 +6,7 @@ from api import common_schemas
 from api.v1 import schemas, dependencies
 from services.domain import sales as sales_services
 from services.external_dodo_api import OfficeManagerAPI, ShiftManagerAPI
-from services.http_client_factories import HTTPClient
+from services.http_client_factories import AsyncHTTPClient
 from services.periods import Period
 
 router = APIRouter(prefix='/v1/{country_code}', tags=['Orders'])
@@ -18,7 +18,7 @@ router = APIRouter(prefix='/v1/{country_code}', tags=['Orders'])
 async def get_cheated_orders(
         units: common_schemas.UnitIDsAndNames = Body(),
         repeated_phone_number_count_threshold: int = Body(),
-        closing_office_manager_api_client: HTTPClient = Depends(dependencies.get_closing_office_manager_api_client),
+        closing_office_manager_api_client: AsyncHTTPClient = Depends(dependencies.get_closing_office_manager_api_client),
 ) -> list[schemas.CheatedOrders]:
     period = Period.today()
     unit_ids = [unit.id for unit in units]
@@ -32,7 +32,7 @@ async def get_cheated_orders(
     path='/canceled-orders',
 )
 async def get_canceled_orders(
-        closing_shift_manager_api_client: HTTPClient = Depends(dependencies.get_closing_shift_manager_api_client),
+        closing_shift_manager_api_client: AsyncHTTPClient = Depends(dependencies.get_closing_shift_manager_api_client),
 ) -> list[schemas.OrderByUUID]:
     period = Period.today()
     async with closing_shift_manager_api_client as client:

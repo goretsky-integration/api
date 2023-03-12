@@ -7,7 +7,7 @@ from api.v1 import schemas, dependencies
 from core import exceptions
 from models.external_api_responses import office_manager as office_manager_models
 from services.external_dodo_api import OfficeManagerAPI
-from services.http_client_factories import HTTPClient
+from services.http_client_factories import AsyncHTTPClient
 
 router = APIRouter(prefix='/v1/{country_code}', tags=['Stocks'])
 
@@ -18,7 +18,7 @@ router = APIRouter(prefix='/v1/{country_code}', tags=['Stocks'])
 async def get_ingredient_stocks(
         unit_ids: common_schemas.UnitIDs = Query(),
         days_left_threshold: int = Query(),
-        closing_office_manager_api_client: HTTPClient = Depends(dependencies.get_closing_office_manager_api_client),
+        closing_office_manager_api_client: AsyncHTTPClient = Depends(dependencies.get_closing_office_manager_api_client),
 ) -> schemas.StockBalanceStatistics:
     async with closing_office_manager_api_client as client:
         api = OfficeManagerAPI(client)

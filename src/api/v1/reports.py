@@ -13,7 +13,7 @@ from services import parsers
 from services.domain import sales as sales_services
 from services.external_dodo_api import DodoPublicAPI, OfficeManagerAPI
 from services.external_dodo_api import public_api as public_api_services
-from services.http_client_factories import HTTPClient
+from services.http_client_factories import AsyncHTTPClient
 from services.periods import Period
 
 router = APIRouter(prefix='/v1/{country_code}/reports', tags=['Reports'])
@@ -24,7 +24,7 @@ router = APIRouter(prefix='/v1/{country_code}/reports', tags=['Reports'])
 )
 @cache(expire=60, namespace='revenue')
 async def get_revenue_statistics(
-        closing_public_api_client: HTTPClient = Depends(dependencies.get_closing_public_api_client),
+        closing_public_api_client: AsyncHTTPClient = Depends(dependencies.get_closing_public_api_client),
         unit_ids: common_schemas.UnitIDs = Query(),
 ) -> schemas.RevenueStatisticsReport:
     async with closing_public_api_client as client:
@@ -46,7 +46,7 @@ async def get_revenue_statistics(
 @cache(expire=60, namespace='awaiting-orders')
 async def get_delivery_partial_statistics(
         unit_ids: common_schemas.UnitIDs = Query(),
-        closing_office_manager_api_client: HTTPClient = Depends(dependencies.get_closing_office_manager_api_client),
+        closing_office_manager_api_client: AsyncHTTPClient = Depends(dependencies.get_closing_office_manager_api_client),
 ) -> schemas.DeliveryPartialStatisticsReport:
     async with closing_office_manager_api_client as client:
         api = OfficeManagerAPI(client)
@@ -64,7 +64,7 @@ async def get_delivery_partial_statistics(
 @cache(expire=60, namespace='kitchen-productivity')
 async def get_kitchen_partial_statistics(
         unit_ids: common_schemas.UnitIDs = Query(),
-        closing_office_manager_api_client: HTTPClient = Depends(dependencies.get_closing_office_manager_api_client),
+        closing_office_manager_api_client: AsyncHTTPClient = Depends(dependencies.get_closing_office_manager_api_client),
 ) -> schemas.KitchenPartialStatisticsReport:
     async with closing_office_manager_api_client as client:
         api = OfficeManagerAPI(client)
@@ -81,7 +81,7 @@ async def get_kitchen_partial_statistics(
 )
 async def get_bonus_system_statistics(
         unit_ids_and_names: common_schemas.UnitIDsAndNames = Body(),
-        closing_office_manager_api_client: HTTPClient = Depends(dependencies.get_closing_office_manager_api_client),
+        closing_office_manager_api_client: AsyncHTTPClient = Depends(dependencies.get_closing_office_manager_api_client),
 ) -> list[schemas.UnitBonusSystemStatistics]:
     period = Period.today()
     unit_ids = {unit.id for unit in unit_ids_and_names}
@@ -116,7 +116,7 @@ async def get_bonus_system_statistics(
 )
 async def on_get_trips_with_one_order(
         unit_ids: common_schemas.UnitIDs = Query(),
-        closing_office_manager_api_client: HTTPClient = Depends(dependencies.get_closing_office_manager_api_client),
+        closing_office_manager_api_client: AsyncHTTPClient = Depends(dependencies.get_closing_office_manager_api_client),
 ) -> list[schemas.TripsWithOneOrder]:
     period = Period.today()
     async with closing_office_manager_api_client as client:
