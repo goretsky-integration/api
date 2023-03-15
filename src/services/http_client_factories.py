@@ -68,5 +68,6 @@ def closing_export_service_api_client_factory(
 ) -> HTTPClient:
     base_url = f'https://officemanager.dodopizza.{country_code}/'
     headers = {'User-Agent': app_user_agent}
+    cookies |= {'SelectedLanguage7': 'ru-RU'}
     with httpx.Client(headers=headers, cookies=cookies, base_url=base_url, timeout=120) as client:
         yield client
