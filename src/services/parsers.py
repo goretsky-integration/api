@@ -277,7 +277,7 @@ class UsedPromoCodesHTMLParser(HTMLParser):
         self.__unit_id = unit_id
 
     def parse(self) -> Any:
-        table_body = self._soup.find('tbody')
+        table_body = self._soup.find_all('tbody')[-1]
         table_rows = table_body.find_all('tr')
 
         used_promo_codes: list[UsedPromoCode] = []
