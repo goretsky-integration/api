@@ -6,7 +6,7 @@ from pandas.core.groupby import DataFrameGroupBy
 from core import exceptions
 from models.external_api_responses import office_manager as office_manager_models
 from services import parsers
-from services.http_client_factories import HTTPClient
+from services.http_client_factories import AsyncHTTPClient
 from services.periods import Period
 
 __all__ = ('OfficeManagerAPI',)
@@ -14,7 +14,7 @@ __all__ = ('OfficeManagerAPI',)
 
 class OfficeManagerAPI:
 
-    def __init__(self, client: HTTPClient):
+    def __init__(self, client: AsyncHTTPClient):
         self.__client = client
 
     async def get_delivery_partial_statistics(
@@ -101,3 +101,30 @@ class OfficeManagerAPI:
         url = '/Reports/StopSaleStatistic/GetDeliveryUnitStopSaleReport'
         response = await self.__client.post(url, data=request_data)
         return parsers.StreetStopSalesHTMLParser(response.text).parse()
+
+    async def get_used_promocodes(self, period: Period, unit_id: int) -> str:
+        url = '/Reports/PromoCodeUsed/Get'
+        request_data = {
+            'unitsIds': unit_id,
+            'OrderSources': (
+                'Telephone',
+                'Site',
+                'Restaurant',
+                'DefectOrder',
+                'Mobile',
+                'Pizzeria',
+                'Aggregator',
+                'Kiosk',
+            ),
+            'beginDate': period.start.strftime('%d.%m.%Y'),
+            'endDate': period.end.strftime('%d.%m.%Y'),
+            'orderTypes': ('Delivery', 'Pickup', 'Stationary'),
+            'IsAllPromoCode': [True, False],
+            'OnlyComposition': False,
+            'promoCode': '',
+            'filterType': '',
+        }
+        response = await self.__client.post(url, data=request_data)
+        if response.is_error:
+            raise
+        return response.text

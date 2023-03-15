@@ -7,7 +7,7 @@ from pydantic import parse_obj_as
 from core import exceptions
 from models.external_api_responses import dodo_is_api as models
 from services.periods import Period, round_to_hours
-from services.http_client_factories import HTTPClient
+from services.http_client_factories import AsyncHTTPClient
 
 
 def stringify_uuids(uuids: Iterable[UUID]) -> str:
@@ -16,7 +16,7 @@ def stringify_uuids(uuids: Iterable[UUID]) -> str:
 
 @dataclass(frozen=True, slots=True)
 class DodoISAPI:
-    client: HTTPClient
+    client: AsyncHTTPClient
 
     async def get_production_productivity_statistics(
             self,

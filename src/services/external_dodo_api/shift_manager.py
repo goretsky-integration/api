@@ -1,7 +1,7 @@
 from typing import AsyncGenerator
 from uuid import UUID
 
-from services.http_client_factories import HTTPClient
+from services.http_client_factories import AsyncHTTPClient
 from models.external_api_responses import shift_manager as shift_manager_models
 from services import parsers
 from services.periods import Period
@@ -11,7 +11,7 @@ __all__ = ('ShiftManagerAPI',)
 
 class ShiftManagerAPI:
 
-    def __init__(self, client: HTTPClient):
+    def __init__(self, client: AsyncHTTPClient):
         self.__client = client
 
     async def get_partial_canceled_orders(

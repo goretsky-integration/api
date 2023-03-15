@@ -18,6 +18,7 @@ from models.external_api_responses.office_manager import (
     UnitKitchenPartialStatistics,
 )
 from models.external_api_responses.shift_manager import OrderPartial, OrderByUUID
+from models.external_api_responses.export_service_api import UsedPromoCode
 
 __all__ = (
     'PartialStatisticsParser',
@@ -31,6 +32,7 @@ __all__ = (
     'OrdersPartial',
     'ExcelParser',
     'DeliveryStatisticsExcelParser',
+    'UsedPromoCodesExcelParser',
 )
 
 
@@ -264,3 +266,36 @@ class DeliveryStatisticsExcelParser(ExcelParser):
                 percentage=round(trips_with_one_order_percentage * 100, 2))
             )
         return result
+
+
+class UsedPromoCodesExcelParser(ExcelParser):
+    def parse(self) -> list[UsedPromoCode]:
+        rows = self._ws['A6': f'I{self._ws.max_row}']
+        used_promo_codes: list[UsedPromoCode] = []
+        for row in rows:
+            (
+                unit_name,
+                promo_code,
+                event,
+                typical_description,
+                order_type,
+                order_status,
+                order_no,
+                ordered_at,
+                order_price,
+            ) = [cell.value for cell in row]
+
+            used_promo_codes.append(
+                UsedPromoCode(
+                    unit_name=unit_name,
+                    promo_code=promo_code,
+                    event=event,
+                    typical_description=typical_description,
+                    order_type=order_type,
+                    order_status=order_status,
+                    order_no=order_no,
+                    ordered_at=ordered_at,
+                    order_price=order_price,
+                )
+            )
+        return used_promo_codes
