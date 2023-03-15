@@ -1,6 +1,7 @@
 import pathlib
 import unicodedata
 import uuid
+import operator
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -273,6 +274,9 @@ class UsedPromoCodesExcelParser(ExcelParser):
         rows = self._ws['A6': f'I{self._ws.max_row}']
         used_promo_codes: list[UsedPromoCode] = []
         for row in rows:
+            values = [value for cell in row if (value := cell.value) is not None]
+            if len(values) != 9:
+                continue
             (
                 unit_name,
                 promo_code,
@@ -283,7 +287,7 @@ class UsedPromoCodesExcelParser(ExcelParser):
                 order_no,
                 ordered_at,
                 order_price,
-            ) = [cell.value for cell in row]
+            ) = values
 
             used_promo_codes.append(
                 UsedPromoCode(
