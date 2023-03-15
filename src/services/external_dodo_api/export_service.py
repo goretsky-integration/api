@@ -27,10 +27,11 @@ class ExportServiceAPI:
             'beginDate': period.start.strftime('%d.%m.%Y'),
             'endDate': period.end.strftime('%d.%m.%Y'),
             'orderTypes': ('Delivery', 'Pickup', 'Stationary'),
-            'IsAllPromoCode': [True, False],
+            'IsAllPromoCode': True,
             'OnlyComposition': False,
-            'promoCode': '',
-            'filterType': '',
+            # 'promoCode': '',
+            # 'filterType': '',
         }
+        print(request_data)
         response = self.__http_client.post(url, data=request_data, cookies={'SelectedLanguage7': 'ru-RU'})
         return response.content

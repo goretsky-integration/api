@@ -34,6 +34,7 @@ __all__ = (
     'ExcelParser',
     'DeliveryStatisticsExcelParser',
     'UsedPromoCodesExcelParser',
+    'UsedPromoCodesHTMLParser',
 )
 
 
@@ -267,6 +268,48 @@ class DeliveryStatisticsExcelParser(ExcelParser):
                 percentage=round(trips_with_one_order_percentage * 100, 2))
             )
         return result
+
+
+class UsedPromoCodesHTMLParser(HTMLParser):
+
+    def __init__(self, html: str, unit_id: int):
+        super().__init__(html)
+        self.__unit_id = unit_id
+
+    def parse(self) -> Any:
+        table_body = self._soup.find('tbody')
+        table_rows = table_body.find_all('tr')
+
+        used_promo_codes: list[UsedPromoCode] = []
+
+        for table_row in table_rows:
+            table_row_data = [td.text.strip() for td in table_row.find_all('td')]
+            (
+                promo_code,
+                event,
+                typical_description,
+                order_type,
+                order_status,
+                order_no,
+                ordered_at,
+                order_price,
+                *_,
+            ) = table_row_data
+
+            used_promo_codes.append(
+                UsedPromoCode(
+                    unit_id=self.__unit_id,
+                    promo_code=promo_code,
+                    event=event,
+                    typical_description=typical_description,
+                    order_type=order_type,
+                    order_status=order_status,
+                    order_no=order_no,
+                    ordered_at=ordered_at,
+                    order_price=order_price,
+                )
+            )
+        return used_promo_codes
 
 
 class UsedPromoCodesExcelParser(ExcelParser):

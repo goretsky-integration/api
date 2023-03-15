@@ -2,7 +2,7 @@ import datetime
 from decimal import Decimal
 from uuid import UUID
 
-from pydantic import BaseModel, NonNegativeInt
+from pydantic import BaseModel, NonNegativeInt, PositiveInt
 
 __all__ = (
     'CheatedOrder',
@@ -37,7 +37,7 @@ class OrderByUUID(BaseModel):
 
 
 class UsedPromoCode(BaseModel):
-    unit_name: str
+    unit_id: PositiveInt
     promo_code: str
     event: str
     typical_description: str
