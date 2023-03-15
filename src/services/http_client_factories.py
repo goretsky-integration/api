@@ -42,6 +42,7 @@ async def closing_office_manager_api_client_factory(
 ) -> AsyncHTTPClient:
     base_url = f'https://officemanager.dodopizza.{country_code}/'
     headers = {'User-Agent': app_user_agent}
+    cookies |= {'SelectedLanguage7': 'ru-RU'}
     async with httpx.AsyncClient(headers=headers, cookies=cookies, base_url=base_url, timeout=120) as client:
         yield client
 
