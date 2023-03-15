@@ -101,3 +101,30 @@ class OfficeManagerAPI:
         url = '/Reports/StopSaleStatistic/GetDeliveryUnitStopSaleReport'
         response = await self.__client.post(url, data=request_data)
         return parsers.StreetStopSalesHTMLParser(response.text).parse()
+
+    async def get_used_promocodes(self, period: Period, unit_id: int) -> str:
+        url = '/Reports/PromoCodeUsed/Get'
+        request_data = {
+            'unitsIds': unit_id,
+            'OrderSources': (
+                'Telephone',
+                'Site',
+                'Restaurant',
+                'DefectOrder',
+                'Mobile',
+                'Pizzeria',
+                'Aggregator',
+                'Kiosk',
+            ),
+            'beginDate': period.start.strftime('%d.%m.%Y'),
+            'endDate': period.end.strftime('%d.%m.%Y'),
+            'orderTypes': ('Delivery', 'Pickup', 'Stationary'),
+            'IsAllPromoCode': [True, False],
+            'OnlyComposition': False,
+            'promoCode': '',
+            'filterType': '',
+        }
+        response = await self.__client.post(url, data=request_data)
+        if response.is_error:
+            raise
+        return response.text
