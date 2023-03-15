@@ -105,7 +105,8 @@ class OfficeManagerAPI:
     async def get_used_promocodes(self, period: Period, unit_id: int) -> str:
         url = '/Reports/PromoCodeUsed/Get'
         request_data = {
-            'unitsIds': unit_id,
+            'filterType': '',
+            'unitsIds': [unit_id],
             'OrderSources': (
                 'Telephone',
                 'Site',
@@ -115,16 +116,15 @@ class OfficeManagerAPI:
                 'Pizzeria',
                 'Aggregator',
                 'Kiosk',
-            ),
+        ),
             'beginDate': period.start.strftime('%d.%m.%Y'),
             'endDate': period.end.strftime('%d.%m.%Y'),
-            'orderTypes': ('Delivery', 'Pickup', 'Stationary'),
-            'IsAllPromoCode': [True, False],
-            'OnlyComposition': False,
+            'orderTypes': ['Delivery', 'Pickup', 'Stationary'],
             'promoCode': '',
-            'filterType': '',
+            'IsAllPromoCode': True,
+            'OnlyComposition': False,
         }
         response = await self.__client.post(url, data=request_data)
-        if response.is_error:
+        if not response.is_success:
             raise
         return response.text
