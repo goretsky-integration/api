@@ -53,10 +53,10 @@ async def get_canceled_orders(
 )
 async def get_used_promo_codes(
         unit_id: int = Query(),
+        period: Period = Depends(Period),
         closing_office_manager_api_client: AsyncHTTPClient = Depends(
             dependencies.get_closing_office_manager_api_client),
 ) -> list[schemas.UsedPromoCode]:
-    period = Period.today()
     async with closing_office_manager_api_client as client:
         api = OfficeManagerAPI(client)
         used_promocodes_html_data = await api.get_used_promocodes(period, unit_id)
