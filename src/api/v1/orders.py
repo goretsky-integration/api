@@ -34,9 +34,9 @@ async def get_cheated_orders(
     path='/canceled-orders',
 )
 async def get_canceled_orders(
+        period: Period = Depends(Period),
         closing_shift_manager_api_client: AsyncHTTPClient = Depends(dependencies.get_closing_shift_manager_api_client),
 ) -> list[schemas.OrderByUUID]:
-    period = Period.today()
     async with closing_shift_manager_api_client as client:
         tasks = []
         api = ShiftManagerAPI(client)
