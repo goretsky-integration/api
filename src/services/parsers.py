@@ -1,7 +1,6 @@
 import pathlib
 import unicodedata
 import uuid
-import operator
 from abc import ABC, abstractmethod
 from typing import Any
 
@@ -109,7 +108,7 @@ class DeliveryStatisticsHTMLParser(PartialStatisticsParser):
         couriers_on_shift_count, couriers_in_queue_count = self._panel_titles[3].split('/')
         return UnitDeliveryPartialStatistics(
             unit_id=self._unit_id,
-            heated_shelf_orders_count=self._panel_titles[2],
+            heated_shelf_orders_count=int(self._panel_titles[2]),
             couriers_in_queue_count=couriers_in_queue_count,
             couriers_on_shift_count=couriers_on_shift_count,
         )
@@ -191,9 +190,10 @@ class OrderByUUIDParser(HTMLParser):
 
         courier_name: str | None = None
         for tr in self._soup.find('table').find_all('tr'):
-            if len(tr) != 2:
+            tds = tr.find_all('td')
+            if len(tds) != 2:
                 continue
-            field_name, field_value = [td.text.strip() for td in tr.find_all('td')]
+            field_name, field_value = [td.text.strip() for td in tds]
             if field_name == 'Курьер:' and field_value:
                 courier_name = field_value
                 break
